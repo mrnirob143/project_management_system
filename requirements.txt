@@ -1,0 +1,4 @@
+Django==6.0.2
+mysqlclient==2.2.8
+django-crispy-forms==2.6
+crispy-bootstrap5==2026.3

@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-4">
+    <div class="card shadow mb-4">
+        <div class="card-header bg-warning text-white d-flex justify-content-between">
+            <h5>Managers</h5>
+            <a href="{% url 'create_user' %}" class="btn btn-sm btn-light">+ Add Manager</a>
+        </div>
+        <div class="card-body table-responsive">
+            <table class="table table-bordered table-hover">
+                <thead class="table-warning">
+                    <tr>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>Dept</th>
+                        <th>Post</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for manager in managers %}
+                        <tr>
+                            <td>{{ manager.username }}</td>
+                            <td>{{ manager.email }}</td>
+                            <td>{{ manager.Dept }}</td>
+                            <td>{{ manager.Post }}</td>
+                            <td>
+                                <a href="{% url 'edit_user' manager.id %}" class="btn btn-sm btn-warning">Edit</a>
+                                <a href="{% url 'delete_user' manager.id %}" class="btn btn-sm btn-danger">Delete</a>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr><td colspan="5">No managers found</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

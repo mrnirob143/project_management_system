@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Projects</h2>
+<a href="{% url 'project_add' %}" class="btn btn-primary mb-3">Add Project</a>
+
+<div class="d-none d-md-block table-responsive">
+    <table class="table table-bordered table-hover table-striped">
+        <thead class="table-dark">
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Description</th>
+                <th>Created By</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for project in projects %}
+            <tr>
+                <td>{{ project.ID }}</td>
+                <td>{{ project.Name }}</td>
+                <td>{{ project.Description }}</td>
+                <td>{{ project.Created_By.username }}</td>
+                <td>
+                    <a href="{% url 'project_edit' project.ID %}" class="btn btn-sm btn-warning">Edit</a>
+                    <form method="POST" action="{% url 'project_delete' project.ID %}" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?')">Delete</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="d-md-none">
+    {% for project in projects %}
+    <div class="card mb-3 shadow-sm">
+        <div class="card-body">
+            <h5 class="card-title">{{ project.Name }} (ID: {{ project.ID }})</h5>
+            <p class="card-text"><strong>Description:</strong> {{ project.Description }}</p>
+            <p class="card-text"><strong>Created By:</strong> {{ project.Created_By.username }}</p>
+            <a href="{% url 'project_edit' project.ID %}" class="btn btn-sm btn-warning">Edit</a>
+            <form method="POST" action="{% url 'project_delete' project.ID %}" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?')">Delete</button>
+            </form>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,11 @@
+body { min-height: 100vh; }
+.sidebar {
+    min-width: 200px; max-width: 220px;
+    background-color: #343a40;
+    color: white; min-height: 100vh;
+    padding-top: 20px;
+}
+.sidebar a { color: white; text-decoration: none; padding: 10px 20px; display: block; }
+.sidebar a.active, .sidebar a:hover { background-color: #007bff; border-radius: 4px; }
+.content { flex: 1; padding: 20px; background-color: #f8f9fa; }
+.navbar-custom { background-color: #343a40; color: white; }
