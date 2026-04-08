@@ -47,7 +47,7 @@ def dashboard(request):
         total_tasks = Task.objects.filter(
             P_ID__Created_By__in=User.objects.filter(Q(id=user.id) | Q(Role='ADMIN'))
         ).count()
-    else:  
+    else:
         total_users = None
         total_projects = Task.objects.filter(Assigned_To=user).count()
         total_tasks = total_projects

@@ -1,8 +1,14 @@
 {% extends 'base.html' %}
+
 {% block content %}
 <h2>Tasks</h2>
-<a href="{% url 'task_add' %}" class="btn btn-primary mb-3">Add Task</a>
 
+<!-- Only show the Add Task button if the user is not an Employee -->
+{% if user_role != 'EMPLOYEE' %}
+    <a href="{% url 'task_add' %}" class="btn btn-primary mb-3">Add Task</a>
+{% endif %}
+
+<!-- Table for displaying tasks on medium and larger devices -->
 <div class="d-none d-md-block table-responsive">
     <table class="table table-bordered table-hover table-striped">
         <thead class="table-dark">
@@ -37,11 +43,13 @@
     </table>
 </div>
 
+<!-- Card layout for small devices -->
 <div class="d-md-none">
     {% for task in tasks %}
     <div class="card mb-3 shadow-sm">
         <div class="card-body">
-            <h5 class="card-title">{{ task.Title }} (ID: {{ task.ID }})</h5>
+            <h5 class="card-title">Task ID: {{ task.ID }}</h5>
+            <p class="card-text"><strong>Title:</strong> {{ task.Title }}</p>
             <p class="card-text"><strong>Project:</strong> {{ task.P_ID.Name }}</p>
             <p class="card-text"><strong>Assigned To:</strong> {{ task.Assigned_To.username }}</p>
             <p class="card-text"><strong>Status:</strong> {{ task.Status }}</p>
@@ -55,4 +63,5 @@
     </div>
     {% endfor %}
 </div>
+
 {% endblock %}

@@ -1,7 +1,11 @@
 {% extends 'base.html' %}
+
 {% block content %}
 <h2>Projects</h2>
-<a href="{% url 'project_add' %}" class="btn btn-primary mb-3">Add Project</a>
+<div class="mb-3">
+    <a href="{% url 'project_add' %}" class="btn btn-primary mb-3">Add Project</a>
+    <a href="{% url 'task_list' %}" class="btn btn-secondary mb-3 ml-2">Task List</a>
+</div>
 
 <div class="d-none d-md-block table-responsive">
     <table class="table table-bordered table-hover table-striped">
