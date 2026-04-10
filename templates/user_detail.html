@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="container mt-5">
+
+    <div class="row justify-content-center">
+
+        <div class="col-md-7">
+
+            <div class="card shadow-lg border-0 rounded-4">
+
+                <div class="card-header bg-dark text-white text-center py-3 rounded-top-4">
+                    <h4 class="mb-0">👤 User Details</h4>
+                </div>
+
+                <div class="card-body p-4">
+
+                    <div class="text-center mb-3">
+                        <h3 class="fw-bold">{{ user_obj.username }}</h3>
+                        <span class="badge bg-primary">{{ user_obj.Role }}</span>
+                    </div>
+
+                    <hr>
+
+                    <div class="row">
+
+                        <div class="col-md-6 mb-3">
+                            <strong>Email:</strong><br>
+                            {{ user_obj.email }}
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <strong>Phone:</strong><br>
+                            {{ user_obj.Phone }}
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <strong>Department:</strong><br>
+                            {{ user_obj.Dept }}
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <strong>Post:</strong><br>
+                            {{ user_obj.Post }}
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <strong>Join Date:</strong><br>
+                            {{ user_obj.JoinDate }}
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <strong>User ID:</strong><br>
+                            {{ user_obj.id }}
+                        </div>
+
+                    </div>
+
+                    <hr>
+
+                    <div class="d-flex gap-2">
+
+                        <a href="{% url 'user_list' %}" class="btn btn-secondary w-50">
+                            ⬅ Back
+                        </a>
+
+                        <a href="{% url 'edit_user' user_obj.id %}" class="btn btn-warning w-50">
+                            ✏ Edit
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

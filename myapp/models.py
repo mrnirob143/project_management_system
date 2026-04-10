@@ -47,7 +47,8 @@ class Task(models.Model):
     End = models.DateField()
     Status = models.CharField(max_length=50)
     P_ID = models.ForeignKey(Project, on_delete=models.CASCADE)
-    Assigned_To = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    Assigned_To = models.ManyToManyField(User)
 
     class Meta:
         db_table = 'task'

@@ -3,7 +3,7 @@ from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.db.models import Q
-from .models import User, Project, Task, Task_Comment
+from .models import User, Project, Task, Task_Comment, Project_Assignment
 from .forms import UserUpdateForm, ProjectForm, TaskForm, CommentForm
 
 # ================= LOGIN =================
@@ -39,28 +39,44 @@ def dashboard(request):
         total_users = User.objects.count()
         total_projects = Project.objects.count()
         total_tasks = Task.objects.count()
+        recent_tasks = Task.objects.all().order_by('-ID')[:5]
+
     elif user.Role == 'MANAGER':
         total_users = None
+
         total_projects = Project.objects.filter(
             Q(Created_By=user) | Q(Created_By__Role='ADMIN')
         ).count()
-        total_tasks = Task.objects.filter(
-            P_ID__Created_By__in=User.objects.filter(Q(id=user.id) | Q(Role='ADMIN'))
-        ).count()
-    else:
-        total_users = None
-        total_projects = Task.objects.filter(Assigned_To=user).count()
-        total_tasks = total_projects
 
-    context = {
+        total_tasks = Task.objects.filter(
+            P_ID__Created_By__in=User.objects.filter(
+                Q(id=user.id) | Q(Role='ADMIN')
+            )
+        ).count()
+
+        recent_tasks = Task.objects.filter(
+            P_ID__Created_By__in=User.objects.filter(
+                Q(id=user.id) | Q(Role='ADMIN')
+            )
+        ).order_by('-ID')[:5]
+
+    else:
+        employee_tasks = Task.objects.filter(Assigned_To=user)
+
+        total_users = None
+        total_projects = Project_Assignment.objects.filter(U_ID=user).count()
+
+        total_tasks = employee_tasks.count()   
+
+        recent_tasks = employee_tasks.order_by('-ID')[:5]
+
+    return render(request, 'dashboard.html', {
         'user_role': user.Role,
         'total_users': total_users,
         'total_projects': total_projects,
         'total_tasks': total_tasks,
-    }
-    return render(request, 'dashboard.html', context)
-
-
+        'recent_tasks': recent_tasks,
+    })
 # ================= USER CRUD =================
 @login_required
 def user_list(request):
@@ -104,6 +120,17 @@ def delete_user(request, id):
         user_obj.delete()
         messages.success(request, "User deleted successfully!")
     return redirect('user_list')
+
+@login_required
+def user_detail(request, id):
+    if request.user.Role != 'ADMIN':
+        return redirect('dashboard')
+
+    user_obj = get_object_or_404(User, id=id)
+    return render(request, 'user_detail.html', {
+        'user_obj': user_obj,
+        'user_role': request.user.Role
+    })
 
 
 # ================= PROJECT CRUD =================
@@ -154,56 +181,98 @@ def project_delete(request, id):
     messages.success(request, "Project deleted successfully!")
     return redirect('project_list')
 
+@login_required
+def project_detail(request, id):
+    project = get_object_or_404(Project, ID=id)
+
+    tasks = Task.objects.filter(P_ID=project)
+    assignments = Project_Assignment.objects.filter(P_ID=project)
+
+    employees = [a.U_ID for a in assignments]
+
+    return render(request, 'project_detail.html', {
+        'project': project,
+        'tasks': tasks,
+        'employees': employees,
+        'user_role': request.user.Role
+    })
+
 
 # ================= TASK CRUD =================
 @login_required
 def task_list(request):
-    if request.user.Role == 'ADMIN':
+    user = request.user
+
+    if user.Role == 'ADMIN':
         tasks = Task.objects.all()
-    elif request.user.Role == 'MANAGER':
+
+    elif user.Role == 'MANAGER':
         tasks = Task.objects.filter(
-            P_ID__Created_By__in=User.objects.filter(Q(id=request.user.id) | Q(Role='ADMIN'))
+            P_ID__Created_By__in=User.objects.filter(
+                Q(id=user.id) | Q(Role='ADMIN')
+            )
         )
+
     else:
-        tasks = Task.objects.filter(Assigned_To=request.user)
-    return render(request, 'task_list.html', {'tasks': tasks, 'user_role': request.user.Role})
+        tasks = Task.objects.filter(Assigned_To=user)
 
-
+    return render(request, 'task_list.html', {
+        'tasks': tasks,
+        'user_role': user.Role
+    })
 @login_required
 def task_add(request):
     if request.user.Role not in ['ADMIN', 'MANAGER']:
         return redirect('dashboard')
+
+    project_id = request.GET.get('project_id')
+
     form = TaskForm(request.POST or None)
-    if request.user.Role == 'ADMIN':
-        form.fields['P_ID'].queryset = Project.objects.all()
-    elif request.user.Role == 'MANAGER':
-        form.fields['P_ID'].queryset = Project.objects.filter(Q(Created_By=request.user) | Q(Created_By__Role='ADMIN'))
+
+    form.fields['P_ID'].queryset = Project.objects.all()
     form.fields['Assigned_To'].queryset = User.objects.filter(Role='EMPLOYEE')
+
     if form.is_valid():
-        form.save()
-        messages.success(request, "Task added successfully!")
+        task = form.save(commit=False)
+
+        if project_id:
+            project = get_object_or_404(Project, ID=project_id)
+            task.P_ID = project
+
+        task.save()
+        form.save_m2m()
+
+        if task.P_ID:
+            return redirect('project_detail', id=task.P_ID.ID)
+
         return redirect('task_list')
-    return render(request, 'task_form.html', {'form': form, 'user_role': request.user.Role})
 
-
+    return render(request, 'task_form.html', {
+        'form': form,
+        'user_role': request.user.Role
+    })
 @login_required
 def task_edit(request, id):
     task = get_object_or_404(Task, ID=id)
-    if request.user.Role not in ['ADMIN', 'MANAGER'] or (request.user.Role == 'MANAGER' and task.P_ID.Created_By != request.user and task.P_ID.Created_By.Role != 'ADMIN'):
+
+    if request.user.Role not in ['ADMIN', 'MANAGER']:
         return redirect('dashboard')
+
     form = TaskForm(request.POST or None, instance=task)
-    if request.user.Role == 'ADMIN':
-        form.fields['P_ID'].queryset = Project.objects.all()
-    elif request.user.Role == 'MANAGER':
-        form.fields['P_ID'].queryset = Project.objects.filter(Q(Created_By=request.user) | Q(Created_By__Role='ADMIN'))
+
+    form.fields['P_ID'].queryset = Project.objects.all()
     form.fields['Assigned_To'].queryset = User.objects.filter(Role='EMPLOYEE')
+
     if form.is_valid():
-        form.save()
+        task = form.save(commit=False)
+        task.save()
+
+        form.save_m2m()
+
         messages.success(request, "Task updated successfully!")
         return redirect('task_list')
-    return render(request, 'task_form.html', {'form': form, 'user_role': request.user.Role})
 
-
+    return render(request, 'task_form.html', {'form': form})
 @login_required
 def task_delete(request, id):
     task = get_object_or_404(Task, ID=id)
@@ -227,3 +296,45 @@ def add_comment(request, task_id):
         messages.success(request, "Comment added!")
         return redirect('task_list')
     return render(request, 'comment_form.html', {'form': form, 'user_role': request.user.Role})
+
+
+# ================= ADD MEMBER TO PROJECT =================
+@login_required
+def add_member_to_project(request, project_id):
+    project = get_object_or_404(Project, ID=project_id)
+
+    if request.user.Role not in ['ADMIN', 'MANAGER']:
+        messages.error(request, "You are not allowed to access this page.")
+        return redirect('dashboard')
+
+    if request.user.Role == 'MANAGER':
+        if project.Created_By != request.user and project.Created_By.Role != 'ADMIN':
+            messages.error(request, "Not allowed for this project.")
+            return redirect('dashboard')
+
+    if request.method == 'POST':
+        user_ids = request.POST.getlist('user_ids')
+
+        for user_id in user_ids:
+            user = get_object_or_404(User, id=user_id)
+
+            if not Project_Assignment.objects.filter(P_ID=project, U_ID=user).exists():
+                Project_Assignment.objects.create(
+                    P_ID=project,
+                    U_ID=user,
+                    Assigned_By=request.user,
+                    Assigned_Date=request.user.JoinDate
+                )
+
+        messages.success(request, "Members added successfully!")
+        return redirect('project_detail', id=project.ID)
+
+    unassigned_users = User.objects.exclude(
+        id__in=Project_Assignment.objects.filter(P_ID=project).values('U_ID')
+    ).filter(Role='EMPLOYEE')
+
+    return render(request, 'add_member_to_project.html', {
+        'project': project,
+        'unassigned_users': unassigned_users,
+        'user_role': request.user.Role
+    })

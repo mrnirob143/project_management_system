@@ -1,67 +1,47 @@
 {% extends 'base.html' %}
 
 {% block content %}
+
 <h2>Tasks</h2>
 
-<!-- Only show the Add Task button if the user is not an Employee -->
 {% if user_role != 'EMPLOYEE' %}
-    <a href="{% url 'task_add' %}" class="btn btn-primary mb-3">Add Task</a>
+<a href="{% url 'task_add' %}" class="btn btn-primary mb-3">Add Task</a>
 {% endif %}
 
-<!-- Table for displaying tasks on medium and larger devices -->
-<div class="d-none d-md-block table-responsive">
-    <table class="table table-bordered table-hover table-striped">
-        <thead class="table-dark">
-            <tr>
-                <th>ID</th>
-                <th>Title</th>
-                <th>Project</th>
-                <th>Assigned To</th>
-                <th>Status</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for task in tasks %}
-            <tr>
-                <td>{{ task.ID }}</td>
-                <td>{{ task.Title }}</td>
-                <td>{{ task.P_ID.Name }}</td>
-                <td>{{ task.Assigned_To.username }}</td>
-                <td>{{ task.Status }}</td>
-                <td>
-                    <a href="{% url 'task_edit' task.ID %}" class="btn btn-sm btn-warning">Edit</a>
-                    <form method="POST" action="{% url 'task_delete' task.ID %}" style="display:inline;">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?')">Delete</button>
-                    </form>
-                    <a href="{% url 'add_comment' task.ID %}" class="btn btn-sm btn-secondary">Comment</a>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</div>
+<table class="table table-bordered">
+    <thead class="table-dark">
+        <tr>
+            <th>Name</th>
+            <th>Project</th>
+            <th>Assigned To</th>
+            <th>Status</th>
+        </tr>
+    </thead>
 
-<!-- Card layout for small devices -->
-<div class="d-md-none">
-    {% for task in tasks %}
-    <div class="card mb-3 shadow-sm">
-        <div class="card-body">
-            <h5 class="card-title">Task ID: {{ task.ID }}</h5>
-            <p class="card-text"><strong>Title:</strong> {{ task.Title }}</p>
-            <p class="card-text"><strong>Project:</strong> {{ task.P_ID.Name }}</p>
-            <p class="card-text"><strong>Assigned To:</strong> {{ task.Assigned_To.username }}</p>
-            <p class="card-text"><strong>Status:</strong> {{ task.Status }}</p>
-            <a href="{% url 'task_edit' task.ID %}" class="btn btn-sm btn-warning">Edit</a>
-            <form method="POST" action="{% url 'task_delete' task.ID %}" style="display:inline;">
-                {% csrf_token %}
-                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?')">Delete</button>
-            </form>
-            <a href="{% url 'add_comment' task.ID %}" class="btn btn-sm btn-secondary">Comment</a>
-        </div>
-    </div>
-    {% endfor %}
-</div>
+    <tbody>
+        {% for task in tasks %}
+        <tr>
+
+            <td>{{ task.Name }}</td>
+            <td>{{ task.P_ID.Name }}</td>
+
+            <td>
+                {% for user in task.Assigned_To.all %}
+    <span class="badge bg-secondary">{{ user.username }}</span>
+{% endfor %}
+            </td>
+
+            <td>
+                {% if task.Status == "Done" %}
+                    <span class="badge bg-success">Done</span>
+                {% else %}
+                    <span class="badge bg-warning text-dark">Pending</span>
+                {% endif %}
+            </td>
+
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
 
 {% endblock %}

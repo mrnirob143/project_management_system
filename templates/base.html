@@ -16,16 +16,13 @@
             <a href="{% url 'dashboard' %}" class="{% if request.path == '/dashboard/' %}active{% endif %}">Dashboard</a>
             <a href="{% url 'user_list' %}" class="{% if request.path == '/users/' %}active{% endif %}">Users</a>
             <a href="{% url 'project_list' %}" class="{% if request.path == '/projects/' %}active{% endif %}">Projects</a>
-            <!-- Tasks link removed for admin -->
         {% elif user_role == 'MANAGER' %}
             <h4 class="text-center mb-4">Manager Panel</h4>
             <a href="{% url 'dashboard' %}" class="{% if request.path == '/dashboard/' %}active{% endif %}">Dashboard</a>
             <a href="{% url 'project_list' %}" class="{% if request.path == '/projects/' %}active{% endif %}">Projects</a>
-            <!-- Tasks link removed for manager -->
         {% else %}
             <h4 class="text-center mb-4">Employee Panel</h4>
             <a href="{% url 'dashboard' %}" class="{% if request.path == '/dashboard/' %}active{% endif %}">Dashboard</a>
-            <!-- Tasks link remains for employees -->
             <a href="{% url 'task_list' %}" class="{% if request.path == '/tasks/' %}active{% endif %}">Tasks</a>
         {% endif %}
     </div>
