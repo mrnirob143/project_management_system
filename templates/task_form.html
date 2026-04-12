@@ -12,7 +12,15 @@
                     <form method="POST">
                         {% csrf_token %}
                         {{ form.as_p }}
-                        <button type="submit" class="btn btn-info w-100 mt-2">Submit</button>
+
+                        <button type="submit" class="btn btn-info w-100 mt-2">
+                            Submit
+                        </button>
+
+                        <a href="javascript:history.back()" class="btn btn-outline-secondary w-100 mt-2">
+                            Back
+                        </a>
+
                     </form>
                 </div>
             </div>

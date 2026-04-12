@@ -15,7 +15,7 @@ class User(AbstractUser):
 
     class Meta:
         db_table = 'user'
-        
+
     def save(self, *args, **kwargs):
         if self.is_superuser:
             self.Role = 'ADMIN'
@@ -23,6 +23,7 @@ class User(AbstractUser):
 
     def __str__(self):
         return self.username
+
 
 class Project(models.Model):
     ID = models.BigAutoField(primary_key=True)
@@ -40,6 +41,7 @@ class Project(models.Model):
     def __str__(self):
         return self.Name
 
+
 class Task(models.Model):
     ID = models.BigAutoField(primary_key=True)
     Name = models.CharField(max_length=200)
@@ -48,13 +50,15 @@ class Task(models.Model):
     Status = models.CharField(max_length=50)
     P_ID = models.ForeignKey(Project, on_delete=models.CASCADE)
 
-    Assigned_To = models.ManyToManyField(User)
+    # ✅ IMPORTANT FIX: better reverse access name
+    Assigned_To = models.ManyToManyField(User, related_name='assigned_tasks', blank=True)
 
     class Meta:
         db_table = 'task'
 
     def __str__(self):
         return self.Name
+
 
 class Task_Comment(models.Model):
     ID = models.BigAutoField(primary_key=True)
@@ -68,6 +72,7 @@ class Task_Comment(models.Model):
 
     def __str__(self):
         return f"Comment {self.ID}"
+
 
 class Project_Assignment(models.Model):
     ID = models.BigAutoField(primary_key=True)

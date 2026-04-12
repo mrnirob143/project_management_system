@@ -1,42 +1,44 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from django.contrib.auth.hashers import make_password
+
 from .models import User, Project, Task, Task_Comment
 
 
 # ================= USER CREATE FORM =================
 class UserCreateForm(UserCreationForm):
-    password1 = forms.CharField(
-        label="Password",
-        widget=forms.PasswordInput(),
-        required=True
-    )
 
     class Meta:
         model = User
         fields = [
             'username', 'email', 'Role', 'Phone',
-            'JoinDate', 'Dept', 'Post'
+            'JoinDate', 'Dept', 'Post', 'password1', 'password2'
         ]
 
         widgets = {
-            'JoinDate': forms.DateInput(attrs={'type': 'date'}),
+            'username': forms.TextInput(attrs={'class': 'form-control'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control'}),
+            'Role': forms.Select(attrs={'class': 'form-select'}),
+            'Phone': forms.TextInput(attrs={'class': 'form-control'}),
+            'JoinDate': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'Dept': forms.TextInput(attrs={'class': 'form-control'}),
+            'Post': forms.TextInput(attrs={'class': 'form-control'}),
         }
 
-    def save(self, commit=True):
-        user = super().save(commit=False)
-        user.set_password(self.cleaned_data["password1"])
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
-        if commit:
-            user.save()
-        return user
+        # ❌ REMOVE default Django help text (THIS FIXES YOUR ISSUE)
+        self.fields['username'].help_text = ""
+        self.fields['password1'].help_text = ""
+        self.fields['password2'].help_text = ""
 
 
 # ================= USER UPDATE FORM =================
 class UserUpdateForm(UserChangeForm):
     password = forms.CharField(
         label="Password",
-        widget=forms.PasswordInput(),
+        widget=forms.PasswordInput(attrs={'class': 'form-control'}),
         required=False
     )
 
@@ -48,8 +50,20 @@ class UserUpdateForm(UserChangeForm):
         ]
 
         widgets = {
-            'JoinDate': forms.DateInput(attrs={'type': 'date'}),
+            'username': forms.TextInput(attrs={'class': 'form-control'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control'}),
+            'Role': forms.Select(attrs={'class': 'form-select'}),
+            'Phone': forms.TextInput(attrs={'class': 'form-control'}),
+            'JoinDate': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'Dept': forms.TextInput(attrs={'class': 'form-control'}),
+            'Post': forms.TextInput(attrs={'class': 'form-control'}),
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # ❌ REMOVE help text
+        self.fields['username'].help_text = ""
 
     def clean_password(self):
         password = self.cleaned_data.get('password')
@@ -65,14 +79,24 @@ class ProjectForm(forms.ModelForm):
         fields = ['Name', 'Desc', 'Start', 'End', 'Status', 'Managed_By']
 
         widgets = {
-            'Start': forms.DateInput(attrs={'type': 'date'}),
-            'End': forms.DateInput(attrs={'type': 'date'}),
-            'Desc': forms.Textarea(attrs={'rows': 3}),
+            'Name': forms.TextInput(attrs={'class': 'form-control'}),
+            'Desc': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'Start': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'End': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'Status': forms.Select(attrs={'class': 'form-select'}),
+            'Managed_By': forms.Select(attrs={'class': 'form-select'}),
         }
 
 
 # ================= TASK FORM =================
 class TaskForm(forms.ModelForm):
+
+    Assigned_To = forms.ModelMultipleChoiceField(
+        queryset=User.objects.filter(Role='EMPLOYEE'),
+        widget=forms.CheckboxSelectMultiple,
+        required=False
+    )
+
     class Meta:
         model = Task
         fields = [
@@ -81,9 +105,11 @@ class TaskForm(forms.ModelForm):
         ]
 
         widgets = {
-            'Start': forms.DateInput(attrs={'type': 'date'}),
-            'End': forms.DateInput(attrs={'type': 'date'}),
-            'Assigned_To': forms.SelectMultiple(),
+            'Name': forms.TextInput(attrs={'class': 'form-control'}),
+            'Start': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'End': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'Status': forms.Select(attrs={'class': 'form-select'}),
+            'P_ID': forms.Select(attrs={'class': 'form-select'}),
         }
 
 
@@ -95,6 +121,7 @@ class CommentForm(forms.ModelForm):
 
         widgets = {
             'Text': forms.Textarea(attrs={
+                'class': 'form-control',
                 'rows': 2,
                 'placeholder': 'Add your comment...'
             }),

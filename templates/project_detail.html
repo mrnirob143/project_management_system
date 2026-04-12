@@ -18,22 +18,23 @@
 
 </div>
 
+<!-- NAV TABS (Bootstrap hover + active works automatically) -->
 <ul class="nav nav-tabs">
 
     <li class="nav-item">
-        <a class="nav-link active" data-bs-toggle="tab" href="#overview">
+        <a class="nav-link active text-dark" data-bs-toggle="tab" href="#overview">
             Overview
         </a>
     </li>
 
     <li class="nav-item">
-        <a class="nav-link" data-bs-toggle="tab" href="#tasks">
+        <a class="nav-link text-dark" data-bs-toggle="tab" href="#tasks">
             Tasks
         </a>
     </li>
 
     <li class="nav-item">
-        <a class="nav-link" data-bs-toggle="tab" href="#members">
+        <a class="nav-link text-dark" data-bs-toggle="tab" href="#members">
             Members
         </a>
     </li>
@@ -97,6 +98,13 @@
         </ul>
     </div>
 
+</div>
+
+<!-- BACK BUTTON -->
+<div class="mt-4">
+    <a href="javascript:history.back()" class="btn btn-secondary">
+        ⬅ Back
+    </a>
 </div>
 
 {% endblock %}

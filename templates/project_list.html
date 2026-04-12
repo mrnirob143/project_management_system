@@ -2,38 +2,95 @@
 
 {% block content %}
 
-<h2>Projects</h2>
+<div class="container mt-4">
 
-{% if user_role == 'ADMIN' %}
-<div class="mb-3">
-    <a href="{% url 'project_add' %}" class="btn btn-primary">
-        Add Project
-    </a>
-</div>
-{% endif %}
+    <h4>Projects</h4>
 
-<div class="table-responsive">
-    <table class="table table-bordered table-hover table-striped">
+    {% if user_role == 'ADMIN' %}
+    <div class="mb-3">
+        <a href="{% url 'project_add' %}" class="btn btn-primary">
+            Add Project
+        </a>
+    </div>
+    {% endif %}
 
-        <thead class="table-dark">
-            <tr>
-                <th>ID</th>
-                <th>Name</th>
-                <th>Description</th>
-                <th>Created By</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
+    <!-- ================= DESKTOP TABLE ================= -->
+    <div class="d-none d-md-block table-responsive">
+        <table class="table table-bordered table-hover table-striped">
 
-        <tbody>
-            {% for project in projects %}
-            <tr>
-                <td>{{ project.ID }}</td>
-                <td>{{ project.Name }}</td>
-                <td>{{ project.Desc }}</td>
-                <td>{{ project.Created_By.username }}</td>
+            <thead class="table-dark">
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Created By</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
 
-                <td>
+            <tbody>
+                {% for project in projects %}
+                <tr>
+                    <td>{{ project.ID }}</td>
+                    <td>{{ project.Name }}</td>
+                    <td>{{ project.Desc }}</td>
+                    <td>{{ project.Created_By.username }}</td>
+
+                    <td>
+
+                        <a href="{% url 'project_edit' project.ID %}" 
+                           class="btn btn-sm btn-warning">
+                            Edit
+                        </a>
+
+                        {% if user_role == 'ADMIN' %}
+                        <form method="POST" action="{% url 'project_delete' project.ID %}" style="display:inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-danger"
+                                    onclick="return confirm('Are you sure?')">
+                                Delete
+                            </button>
+                        </form>
+                        {% endif %}
+
+                        {% if user_role == 'MANAGER' or user_role == 'ADMIN' %}
+                        <a href="{% url 'project_detail' project.ID %}" 
+                           class="btn btn-sm btn-primary">
+                            Details
+                        </a>
+                        {% endif %}
+
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+
+        </table>
+    </div>
+
+
+    <!-- ================= MOBILE CARD VIEW ================= -->
+    <div class="d-md-none">
+
+        {% for project in projects %}
+        <div class="card mb-3 shadow-sm">
+
+            <div class="card-body">
+
+                <h5 class="card-title">
+                    {{ project.Name }} (ID: {{ project.ID }})
+                </h5>
+
+                <p class="card-text">
+                    <strong>Description:</strong> {{ project.Desc }}
+                </p>
+
+                <p class="card-text">
+                    <strong>Created By:</strong> {{ project.Created_By.username }}
+                </p>
+
+                <!-- ACTIONS -->
+                <div class="d-flex flex-wrap gap-2">
 
                     <a href="{% url 'project_edit' project.ID %}" 
                        class="btn btn-sm btn-warning">
@@ -41,7 +98,7 @@
                     </a>
 
                     {% if user_role == 'ADMIN' %}
-                    <form method="POST" action="{% url 'project_delete' project.ID %}" style="display:inline;">
+                    <form method="POST" action="{% url 'project_delete' project.ID %}">
                         {% csrf_token %}
                         <button type="submit" class="btn btn-sm btn-danger"
                                 onclick="return confirm('Are you sure?')">
@@ -51,19 +108,21 @@
                     {% endif %}
 
                     {% if user_role == 'MANAGER' or user_role == 'ADMIN' %}
-                        <a href="{% url 'project_detail' project.ID %}" 
-                           class="btn btn-sm btn-primary">
-                            Details
-                        </a>
+                    <a href="{% url 'project_detail' project.ID %}" 
+                       class="btn btn-sm btn-primary">
+                        Details
+                    </a>
                     {% endif %}
 
-                </td>
+                </div>
 
-            </tr>
-            {% endfor %}
-        </tbody>
+            </div>
 
-    </table>
+        </div>
+        {% endfor %}
+
+    </div>
+
 </div>
 
 {% endblock %}
