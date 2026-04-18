@@ -14,7 +14,6 @@
     </div>
     {% endif %}
 
-    <!-- ================= DESKTOP TABLE ================= -->
     <div class="d-none d-md-block table-responsive">
         <table class="table table-bordered table-hover table-striped">
 
@@ -38,10 +37,12 @@
 
                     <td>
 
+                        {% if user_role != 'EMPLOYEE' %}
                         <a href="{% url 'project_edit' project.ID %}" 
                            class="btn btn-sm btn-warning">
                             Edit
                         </a>
+                        {% endif %}
 
                         {% if user_role == 'ADMIN' %}
                         <form method="POST" action="{% url 'project_delete' project.ID %}" style="display:inline;">
@@ -53,12 +54,10 @@
                         </form>
                         {% endif %}
 
-                        {% if user_role == 'MANAGER' or user_role == 'ADMIN' %}
                         <a href="{% url 'project_detail' project.ID %}" 
                            class="btn btn-sm btn-primary">
                             Details
                         </a>
-                        {% endif %}
 
                     </td>
                 </tr>
@@ -68,8 +67,6 @@
         </table>
     </div>
 
-
-    <!-- ================= MOBILE CARD VIEW ================= -->
     <div class="d-md-none">
 
         {% for project in projects %}
@@ -89,13 +86,14 @@
                     <strong>Created By:</strong> {{ project.Created_By.username }}
                 </p>
 
-                <!-- ACTIONS -->
                 <div class="d-flex flex-wrap gap-2">
 
+                    {% if user_role != 'EMPLOYEE' %}
                     <a href="{% url 'project_edit' project.ID %}" 
                        class="btn btn-sm btn-warning">
                         Edit
                     </a>
+                    {% endif %}
 
                     {% if user_role == 'ADMIN' %}
                     <form method="POST" action="{% url 'project_delete' project.ID %}">
@@ -107,12 +105,10 @@
                     </form>
                     {% endif %}
 
-                    {% if user_role == 'MANAGER' or user_role == 'ADMIN' %}
                     <a href="{% url 'project_detail' project.ID %}" 
                        class="btn btn-sm btn-primary">
                         Details
                     </a>
-                    {% endif %}
 
                 </div>
 
@@ -121,6 +117,12 @@
         </div>
         {% endfor %}
 
+    </div>
+
+    <div class="mt-4">
+        <a href="javascript:history.back()" class="btn btn-secondary">
+            ⬅ Back
+        </a>
     </div>
 
 </div>

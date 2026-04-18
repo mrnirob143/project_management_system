@@ -1,27 +1,75 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="container mt-4">
+<div class="container mt-3 mt-md-4">
+
     <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card shadow">
-                <div class="card-header bg-success text-white text-center">
-                    <h4>{% if form.instance.pk %}Edit Project{% else %}Add Project{% endif %}</h4>
+
+        <!-- ✅ Fully responsive column -->
+        <div class="col-12 col-sm-11 col-md-8 col-lg-6">
+
+            <div class="card shadow border-0 rounded-4">
+
+                <!-- Header -->
+                <div class="card-header bg-success text-white text-center rounded-top-4">
+                    <h5 class="mb-0">
+                        {% if form.instance.pk %}
+                            Edit Project
+                        {% else %}
+                            Add Project
+                        {% endif %}
+                    </h5>
                 </div>
-                <div class="card-body">
+
+                <!-- Body -->
+                <div class="card-body p-3 p-md-4">
+
                     <form method="POST">
                         {% csrf_token %}
-                        {{ form.as_p }}
-                        <button type="submit" class="btn btn-success w-100 mt-2">Submit</button>
+
+                        <!-- ✅ RESPONSIVE FORM FIELDS -->
+                        {% for field in form %}
+                            <div class="mb-3">
+
+                                <label class="form-label fw-semibold">
+                                    {{ field.label }}
+                                </label>
+
+                                {{ field }}
+
+                                {% if field.help_text %}
+                                    <small class="text-muted d-block">
+                                        {{ field.help_text }}
+                                    </small>
+                                {% endif %}
+
+                                {% if field.errors %}
+                                    <div class="text-danger small">
+                                        {{ field.errors }}
+                                    </div>
+                                {% endif %}
+
+                            </div>
+                        {% endfor %}
+
+                        <!-- Buttons -->
+                        <button type="submit" class="btn btn-success w-100 mt-2">
+                            Submit
+                        </button>
+
                     </form>
 
-                    <!-- Back Button -->
                     <a href="javascript:history.back()" class="btn btn-secondary w-100 mt-2">
                         Back
                     </a>
+
                 </div>
+
             </div>
+
         </div>
+
     </div>
+
 </div>
 {% endblock %}

@@ -12,7 +12,8 @@ class UserCreateForm(UserCreationForm):
         model = User
         fields = [
             'username', 'email', 'Role', 'Phone',
-            'JoinDate', 'Dept', 'Post', 'password1', 'password2'
+            'JoinDate', 'Dept', 'Post',
+            'password1', 'password2'
         ]
 
         widgets = {
@@ -27,8 +28,6 @@ class UserCreateForm(UserCreationForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
-        # ❌ REMOVE default Django help text (THIS FIXES YOUR ISSUE)
         self.fields['username'].help_text = ""
         self.fields['password1'].help_text = ""
         self.fields['password2'].help_text = ""
@@ -36,10 +35,10 @@ class UserCreateForm(UserCreationForm):
 
 # ================= USER UPDATE FORM =================
 class UserUpdateForm(UserChangeForm):
+
     password = forms.CharField(
-        label="Password",
+        required=False,
         widget=forms.PasswordInput(attrs={'class': 'form-control'}),
-        required=False
     )
 
     class Meta:
@@ -59,24 +58,17 @@ class UserUpdateForm(UserChangeForm):
             'Post': forms.TextInput(attrs={'class': 'form-control'}),
         }
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        # ❌ REMOVE help text
-        self.fields['username'].help_text = ""
-
     def clean_password(self):
         password = self.cleaned_data.get('password')
-        if password:
-            return make_password(password)
-        return self.instance.password
+        return make_password(password) if password else self.initial.get('password', '')
 
 
-# ================= PROJECT FORM =================
+# ================= PROJECT FORM (FIXED RESPONSIVE) =================
 class ProjectForm(forms.ModelForm):
+
     class Meta:
         model = Project
-        fields = ['Name', 'Desc', 'Start', 'End', 'Status', 'Managed_By']
+        fields = '__all__'
 
         widgets = {
             'Name': forms.TextInput(attrs={'class': 'form-control'}),
@@ -84,25 +76,42 @@ class ProjectForm(forms.ModelForm):
             'Start': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
             'End': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
             'Status': forms.Select(attrs={'class': 'form-select'}),
+            'Created_By': forms.Select(attrs={'class': 'form-select'}),
             'Managed_By': forms.Select(attrs={'class': 'form-select'}),
+
+            # ✅ FIXED (IMPORTANT FOR RESPONSIVE)
+            'Members': forms.SelectMultiple(attrs={
+                'class': 'form-select',
+                'size': '5'
+            }),
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.fields['Created_By'].queryset = User.objects.filter(Role='ADMIN')
+        self.fields['Managed_By'].queryset = User.objects.filter(Role='MANAGER')
+        self.fields['Members'].queryset = User.objects.filter(Role='EMPLOYEE')
+
+        if self.instance and self.instance.pk:
+            self.fields['Created_By'].widget = forms.HiddenInput()
 
 
 # ================= TASK FORM =================
 class TaskForm(forms.ModelForm):
 
-    Assigned_To = forms.ModelMultipleChoiceField(
-        queryset=User.objects.filter(Role='EMPLOYEE'),
-        widget=forms.CheckboxSelectMultiple,
-        required=False
-    )
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
+
+        # MANAGER restriction
+        if self.user and self.user.Role == 'MANAGER':
+            self.fields.pop('P_ID', None)
+            self.fields.pop('End', None)
 
     class Meta:
         model = Task
-        fields = [
-            'Name', 'Start', 'End',
-            'Status', 'P_ID', 'Assigned_To'
-        ]
+        fields = '__all__'
 
         widgets = {
             'Name': forms.TextInput(attrs={'class': 'form-control'}),
@@ -110,11 +119,13 @@ class TaskForm(forms.ModelForm):
             'End': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
             'Status': forms.Select(attrs={'class': 'form-select'}),
             'P_ID': forms.Select(attrs={'class': 'form-select'}),
+            'Assigned_To': forms.Select(attrs={'class': 'form-select'}),
         }
 
 
 # ================= COMMENT FORM =================
 class CommentForm(forms.ModelForm):
+
     class Meta:
         model = Task_Comment
         fields = ['Text']
@@ -122,7 +133,6 @@ class CommentForm(forms.ModelForm):
         widgets = {
             'Text': forms.Textarea(attrs={
                 'class': 'form-control',
-                'rows': 2,
-                'placeholder': 'Add your comment...'
+                'rows': 2
             }),
         }
