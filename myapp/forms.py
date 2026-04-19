@@ -39,7 +39,7 @@ class UserUpdateForm(UserChangeForm):
     password = forms.CharField(
         required=False,
         widget=forms.PasswordInput(attrs={'class': 'form-control'}),
-        help_text="Leave blank if you don't want to change password"
+        help_text="Leave blank if not changing password"
     )
 
     class Meta:
@@ -49,23 +49,21 @@ class UserUpdateForm(UserChangeForm):
             'JoinDate', 'Dept', 'Post', 'password'
         ]
 
+
+# ================= USER SELF EDIT (MANAGER / EMPLOYEE) =================
+class UserSelfUpdateForm(forms.ModelForm):
+
+    class Meta:
+        model = User
+        fields = ['username', 'email', 'Phone', 'Dept', 'Post']
+
         widgets = {
             'username': forms.TextInput(attrs={'class': 'form-control'}),
             'email': forms.EmailInput(attrs={'class': 'form-control'}),
-            'Role': forms.Select(attrs={'class': 'form-select'}),
             'Phone': forms.TextInput(attrs={'class': 'form-control'}),
-            'JoinDate': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
             'Dept': forms.TextInput(attrs={'class': 'form-control'}),
             'Post': forms.TextInput(attrs={'class': 'form-control'}),
         }
-
-    def clean_password(self):
-        password = self.cleaned_data.get('password')
-
-        if password:
-            return make_password(password)
-
-        return self.initial.get('password', '')
 
 
 # ================= PROJECT FORM =================
@@ -102,17 +100,15 @@ class TaskForm(forms.ModelForm):
 
     class Meta:
         model = Task
-        fields = '__all__'
+
+        fields = ['Name', 'Start', 'Status', 'Assigned_To']
 
         widgets = {
             'Name': forms.TextInput(attrs={'class': 'form-control'}),
             'Start': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
-            'End': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
             'Status': forms.Select(attrs={'class': 'form-select'}),
-            'P_ID': forms.Select(attrs={'class': 'form-select'}),
             'Assigned_To': forms.Select(attrs={'class': 'form-select'}),
         }
-
 
 # ================= COMMENT FORM =================
 class CommentForm(forms.ModelForm):

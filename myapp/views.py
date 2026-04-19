@@ -6,6 +6,11 @@ from django.db.models import Q
 from .models import User, Project, Task, Task_Comment
 from .forms import UserUpdateForm, ProjectForm, TaskForm, CommentForm
 from django.contrib.auth.hashers import make_password
+from django.contrib.auth import update_session_auth_hash
+from django.contrib.auth.hashers import check_password
+from .forms import UserUpdateForm, UserSelfUpdateForm
+
+
 
 
 # ================= LOGIN =================
@@ -114,23 +119,30 @@ def create_user(request):
 
 @login_required
 def edit_user(request, id):
-    if request.user.Role != 'ADMIN':
-        return redirect('dashboard')
 
     user_obj = get_object_or_404(User, id=id)
-    form = UserUpdateForm(request.POST or None, instance=user_obj)
+
+    if request.user.Role != 'ADMIN' and request.user.id != user_obj.id:
+        return redirect('dashboard')
+
+    if request.user.Role == 'ADMIN':
+        form = UserUpdateForm(request.POST or None, instance=user_obj)
+
+        if request.user.id == user_obj.id:
+            form.fields.pop('password', None)
+
+    else:
+        form = UserSelfUpdateForm(request.POST or None, instance=user_obj)
 
     if form.is_valid():
         form.save()
-        messages.success(request, "User updated successfully!")
-        return redirect('user_list')
+        messages.success(request, "Profile updated successfully!")
+        return redirect('user_detail', id=user_obj.id)
 
     return render(request, 'user_form.html', {
         'form': form,
         'user_role': request.user.Role
     })
-
-
 @login_required
 def delete_user(request, id):
     if request.user.Role != 'ADMIN':
@@ -147,16 +159,18 @@ def delete_user(request, id):
 
 @login_required
 def user_detail(request, id):
-    if request.user.Role != 'ADMIN':
-        return redirect('dashboard')
 
     user_obj = get_object_or_404(User, id=id)
+
+   
+
+    if request.user.Role != 'ADMIN' and request.user.id != user_obj.id:
+        return redirect('dashboard')
 
     return render(request, 'user_detail.html', {
         'user_obj': user_obj,
         'user_role': request.user.Role
     })
-
 
 # ================= PROJECT CRUD =================
 @login_required
@@ -279,42 +293,51 @@ def task_list(request):
         'user_role': user.Role
     })
 
-
 @login_required
 def task_add(request):
-    if request.user.Role not in ['ADMIN', 'MANAGER']:
+    if request.user.Role != 'MANAGER':
         return redirect('dashboard')
 
-    form = TaskForm(request.POST or None)
+    project_id = request.GET.get('project_id')
 
+    if not project_id:
+        return redirect('dashboard')
+
+    project = get_object_or_404(Project, ID=project_id)
+
+    form = TaskForm(request.POST or None)
     form.fields['Assigned_To'].queryset = User.objects.filter(Role='EMPLOYEE')
 
     if form.is_valid():
-        form.save()
+        task = form.save(commit=False)
+        task.P_ID = project
+        task.save()
+
         messages.success(request, "Task created successfully!")
-        return redirect('task_list')
+        return redirect('project_detail', id=project.ID)
 
     return render(request, 'task_form.html', {
         'form': form,
+        'project': project,
         'user_role': request.user.Role
     })
-
-
 
 @login_required
 def task_edit(request, id):
     task = get_object_or_404(Task, ID=id)
 
-    # ================= EMPLOYEE =================
     if request.user.Role == 'EMPLOYEE':
         if request.method == "POST":
             status = request.POST.get("Status")
+
             if status:
                 task.Status = status
                 task.save()
-        return redirect('task_list')
+                messages.success(request, "Task status updated successfully!")
 
-    # ================= MANAGER =================
+        return redirect('project_detail', id=task.P_ID.ID)
+
+
     if request.user.Role == 'MANAGER':
 
         if request.method == "POST":
@@ -322,6 +345,10 @@ def task_edit(request, id):
             if request.POST.get("remove_member"):
                 task.delete()
                 messages.success(request, "Task deleted successfully!")
+                return redirect('project_detail', id=task.P_ID.ID)
+
+            if task.Status == "Done":
+                messages.error(request, "Cannot assign member. Task already completed!")
                 return redirect('project_detail', id=task.P_ID.ID)
 
             assigned_to = request.POST.get("assigned_to")
@@ -344,11 +371,11 @@ def task_edit(request, id):
                         return redirect('project_detail', id=task.P_ID.ID)
 
                     task.Assigned_To = user
-
                 else:
                     task.Assigned_To = None
 
                 task.save()
+                messages.success(request, "Task assigned successfully!")
 
                 return redirect('project_detail', id=task.P_ID.ID)
 
@@ -421,26 +448,40 @@ def add_member_to_project(request, project_id):
 @login_required
 def reset_user_password(request, id):
 
-    if request.user.Role != 'ADMIN':
-        return redirect('dashboard')
-
     user_obj = get_object_or_404(User, id=id)
 
-    if request.method == "POST":
-        password = request.POST.get("password")
+    if request.user.Role != 'ADMIN' and request.user.id != user_obj.id:
+        return redirect('dashboard')
 
-        if not password:
-            messages.error(request, "Password cannot be empty!")
+    if request.method == "POST":
+
+        old_password = request.POST.get("old_password")
+        new_password = request.POST.get("new_password")
+        confirm_password = request.POST.get("confirm_password")
+
+        if not new_password or not confirm_password:
+            messages.error(request, "Fields cannot be empty!")
             return redirect('reset_user_password', id=id)
 
-        user_obj.password = make_password(password)
+        if new_password != confirm_password:
+            messages.error(request, "Passwords do not match!")
+            return redirect('reset_user_password', id=id)
+
+        if request.user.Role != 'ADMIN':
+            if not check_password(old_password, user_obj.password):
+                messages.error(request, "Old password is incorrect!")
+                return redirect('reset_user_password', id=id)
+
+        user_obj.set_password(new_password)
         user_obj.save()
 
-        messages.success(request, f"Password reset for {user_obj.username} successful!")
+        if request.user.id == user_obj.id:
+            update_session_auth_hash(request, user_obj)
+
+        messages.success(request, f"Password updated for {user_obj.username}")
         return redirect('user_list')
 
     return render(request, 'reset_user_password.html', {
         'user_obj': user_obj,
         'user_role': request.user.Role
     })
-

@@ -39,13 +39,6 @@
                     </a>
                     {% endif %}
 
-                    {% if request.user.Role == 'ADMIN' %}
-                    <a href="{% url 'reset_user_password' user.id %}" class="btn btn-sm btn-warning">
-                        Reset Password
-                    </a>
-                    {% endif %}
-
-                    <!-- DELETE -->
                     {% if user != request.user %}
                     <form method="POST" action="{% url 'delete_user' user.id %}" style="display:inline;">
                         {% csrf_token %}
@@ -80,10 +73,6 @@
             {% if request.user.Role == 'ADMIN' %}
                 <a href="{% url 'user_detail' user.id %}" class="btn btn-sm btn-info">
                     Details
-                </a>
-
-                <a href="{% url 'reset_user_password' user.id %}" class="btn btn-sm btn-warning">
-                    Reset Password
                 </a>
             {% endif %}
 
