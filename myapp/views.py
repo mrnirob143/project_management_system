@@ -244,7 +244,8 @@ def project_detail(request, id):
             return redirect('dashboard')
 
     tasks = Task.objects.filter(P_ID=project)
-    employees = project.Members.all()
+
+    employees = User.objects.filter(Role='EMPLOYEE')
 
     return render(request, 'project_detail.html', {
         'project': project,
@@ -284,20 +285,12 @@ def task_add(request):
     if request.user.Role not in ['ADMIN', 'MANAGER']:
         return redirect('dashboard')
 
-    form = TaskForm(request.POST or None, user=request.user)
+    form = TaskForm(request.POST or None)
 
-    if 'Assigned_To' in form.fields:
-        form.fields['Assigned_To'].queryset = User.objects.filter(Role='EMPLOYEE')
+    form.fields['Assigned_To'].queryset = User.objects.filter(Role='EMPLOYEE')
 
     if form.is_valid():
-        task = form.save(commit=False)
-
-        # 🎯 MANAGER AUTO ASSIGN
-        if request.user.Role == 'MANAGER':
-            task.P_ID = Project.objects.filter(Managed_By=request.user).first()
-            task.End = None
-
-        task.save()
+        form.save()
         messages.success(request, "Task created successfully!")
         return redirect('task_list')
 
@@ -306,11 +299,13 @@ def task_add(request):
         'user_role': request.user.Role
     })
 
+
+
 @login_required
 def task_edit(request, id):
     task = get_object_or_404(Task, ID=id)
 
-    # EMPLOYEE → only update status
+    # ================= EMPLOYEE =================
     if request.user.Role == 'EMPLOYEE':
         if request.method == "POST":
             status = request.POST.get("Status")
@@ -319,47 +314,45 @@ def task_edit(request, id):
                 task.save()
         return redirect('task_list')
 
-    # MANAGER
+    # ================= MANAGER =================
     if request.user.Role == 'MANAGER':
 
         if request.method == "POST":
 
             if request.POST.get("remove_member"):
-                task.Assigned_To = None
-                task.save()
+                task.delete()
+                messages.success(request, "Task deleted successfully!")
                 return redirect('project_detail', id=task.P_ID.ID)
 
-            form = TaskForm(request.POST or None, instance=task, user=request.user)
+            assigned_to = request.POST.get("assigned_to")
 
-            if form.is_valid():
-                obj = form.save(commit=False)
+            if assigned_to:
+                user = User.objects.get(id=assigned_to)
 
-                # prevent change
-                obj.P_ID = task.P_ID
-                obj.End = task.End
+                if user.Role == "EMPLOYEE":
 
-                obj.save()
-                return redirect('task_list')
+                    conflict = Task.objects.filter(
+                        Assigned_To=user,
+                        Status="In Progress"
+                    ).exclude(ID=task.ID)
 
-        else:
-            form = TaskForm(instance=task, user=request.user)
+                    if conflict.exists():
+                        messages.error(
+                            request,
+                            f"{user.username} already has an In Progress task!"
+                        )
+                        return redirect('project_detail', id=task.P_ID.ID)
 
-        return render(request, 'task_form.html', {
-            'form': form,
-            'user_role': request.user.Role
-        })
+                    task.Assigned_To = user
 
-    # ADMIN
-    form = TaskForm(request.POST or None, instance=task, user=request.user)
+                else:
+                    task.Assigned_To = None
 
-    if form.is_valid():
-        form.save()
-        return redirect('task_list')
+                task.save()
 
-    return render(request, 'task_form.html', {
-        'form': form,
-        'user_role': request.user.Role
-    })
+                return redirect('project_detail', id=task.P_ID.ID)
+
+    return redirect('task_list')
 @login_required
 def task_delete(request, id):
     task = get_object_or_404(Task, ID=id)
@@ -402,12 +395,6 @@ def add_member_to_project(request, project_id):
     if request.user.Role not in ['ADMIN', 'MANAGER']:
         return redirect('dashboard')
 
-    if Task.objects.filter(P_ID=project, Status="In Progress").exists():
-        messages.error(
-            request,
-            "You cannot add members because a task is currently In Progress."
-        )
-        return redirect('project_detail', id=project.ID)
 
     if request.method == 'POST':
         user_ids = request.POST.getlist('user_ids')
@@ -428,6 +415,8 @@ def add_member_to_project(request, project_id):
         'unassigned_users': unassigned_users,
         'user_role': request.user.Role
     })
+
+
 
 @login_required
 def reset_user_password(request, id):

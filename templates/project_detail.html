@@ -21,7 +21,6 @@
 </div>
 
 <ul class="nav nav-tabs">
-
     <li class="nav-item">
         <a class="nav-link active text-dark" data-bs-toggle="tab" href="#overview">
             Overview
@@ -41,11 +40,11 @@
         </a>
     </li>
     {% endif %}
-
 </ul>
 
 <div class="tab-content mt-3">
 
+    <!-- ================= OVERVIEW ================= -->
     <div class="tab-pane fade show active" id="overview">
         <div class="card p-3">
             <p><b>Description:</b> {{ project.Desc }}</p>
@@ -55,35 +54,125 @@
         </div>
     </div>
 
+    <!-- ================= TASKS ================= -->
     <div class="tab-pane fade" id="tasks">
-        <table class="table table-bordered">
 
-            <thead class="table-dark">
-                <tr>
-                    <th>Name</th>
-                    <th>Assigned To</th>
-                    <th>Status</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
+        <!-- ================= TABLE (DESKTOP) ================= -->
+        <div class="table-responsive d-none d-md-block">
+            <table class="table table-bordered">
 
-            <tbody>
-                {% for task in tasks %}
-                <tr>
+                <thead class="table-dark">
+                    <tr>
+                        <th>Name</th>
+                        <th>Assigned To</th>
+                        <th>Status</th>
 
-                    <td>{{ task.Name }}</td>
-
-                    <td>
-                        {% if task.Assigned_To %}
-                            <span class="badge bg-secondary">
-                                {{ task.Assigned_To.username }}
-                            </span>
-                        {% else %}
-                            <span class="text-muted">Not assigned</span>
+                        {% if user_role == 'MANAGER' %}
+                        <th>Assign Employee</th>
                         {% endif %}
-                    </td>
 
-                    <td>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    {% for task in tasks %}
+                    <tr>
+
+                        <td>{{ task.Name }}</td>
+
+                        <td>
+                            {% if task.Assigned_To and task.Assigned_To.Role == 'EMPLOYEE' %}
+                                <span class="badge bg-secondary">
+                                    {{ task.Assigned_To.username }}
+                                </span>
+                            {% else %}
+                                <span class="text-muted">Not assigned</span>
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {% if task.Status == "Done" %}
+                                <span class="badge bg-success">Done</span>
+                            {% elif task.Status == "In Progress" %}
+                                <span class="badge bg-info text-dark">In Progress</span>
+                            {% else %}
+                                <span class="badge bg-warning text-dark">Pending</span>
+                            {% endif %}
+                        </td>
+
+                        {% if user_role == 'MANAGER' %}
+                        <td>
+                            <form method="POST" action="{% url 'task_edit' task.ID %}">
+                                {% csrf_token %}
+
+                                <select name="assigned_to"
+                                        class="form-select form-select-sm"
+                                        onchange="this.form.submit()">
+
+                                    <option value="">Select Employee</option>
+
+                                    {% for emp in employees %}
+                                        <option value="{{ emp.id }}"
+                                            {% if task.Assigned_To and task.Assigned_To.id == emp.id %}selected{% endif %}>
+                                            {{ emp.username }}
+                                        </option>
+                                    {% endfor %}
+
+                                </select>
+                            </form>
+                        </td>
+                        {% endif %}
+
+                        <td>
+                            {% if user_role == 'MANAGER' and task.Assigned_To %}
+
+                            <form method="POST" action="{% url 'task_edit' task.ID %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="remove_member" value="1">
+
+                                <button type="submit"
+                                        class="btn btn-sm btn-danger"
+                                        onclick="return confirm('Remove assigned member?')">
+                                    Remove
+                                </button>
+                            </form>
+
+                            {% else %}
+                                <span class="text-muted">-</span>
+                            {% endif %}
+                        </td>
+
+                    </tr>
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+        </div>
+
+        <!-- ================= CARD VIEW (MOBILE) ================= -->
+        <div class="d-md-none">
+
+            {% for task in tasks %}
+            <div class="card mb-3 shadow-sm">
+
+                <div class="card-body">
+
+                    <h5 class="card-title">{{ task.Name }}</h5>
+
+                    <p>
+                        <b>Assigned:</b>
+                        {% if task.Assigned_To and task.Assigned_To.Role == 'EMPLOYEE' %}
+                            {{ task.Assigned_To.username }}
+                        {% else %}
+                            Not assigned
+                        {% endif %}
+                    </p>
+
+                    <p>
+                        <b>Status:</b>
                         {% if task.Status == "Done" %}
                             <span class="badge bg-success">Done</span>
                         {% elif task.Status == "In Progress" %}
@@ -91,38 +180,46 @@
                         {% else %}
                             <span class="badge bg-warning text-dark">Pending</span>
                         {% endif %}
-                    </td>
+                    </p>
 
-                    <td>
-                        {% if user_role == 'MANAGER' and task.Assigned_To %}
+                    {% if user_role == 'MANAGER' %}
 
-                        <form method="POST" action="{% url 'task_edit' task.ID %}">
-                            {% csrf_token %}
-                            <input type="hidden" name="remove_member" value="1">
+                    <form method="POST" action="{% url 'task_edit' task.ID %}" class="mb-2">
+                        {% csrf_token %}
+                        <select name="assigned_to"
+                                class="form-select form-select-sm"
+                                onchange="this.form.submit()">
 
-                            <button type="submit"
-                                    class="btn btn-sm btn-danger"
-                                    onclick="return confirm('Remove assigned member?')">
-                                Remove
-                            </button>
-                        </form>
+                            <option value="">Assign Employee</option>
 
-                        {% else %}
-                            <span class="text-muted">-</span>
-                        {% endif %}
-                    </td>
+                            {% for emp in employees %}
+                                <option value="{{ emp.id }}"
+                                    {% if task.Assigned_To and task.Assigned_To.id == emp.id %}selected{% endif %}>
+                                    {{ emp.username }}
+                                </option>
+                            {% endfor %}
 
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="4" class="text-center text-muted">
-                        No tasks found
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
+                        </select>
+                    </form>
 
-        </table>
+                    <form method="POST" action="{% url 'task_edit' task.ID %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="remove_member" value="1">
+
+                        <button class="btn btn-sm btn-danger w-100">
+                            Remove
+                        </button>
+                    </form>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+            {% endfor %}
+
+        </div>
+
     </div>
 
 </div>

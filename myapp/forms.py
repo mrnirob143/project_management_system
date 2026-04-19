@@ -39,6 +39,7 @@ class UserUpdateForm(UserChangeForm):
     password = forms.CharField(
         required=False,
         widget=forms.PasswordInput(attrs={'class': 'form-control'}),
+        help_text="Leave blank if you don't want to change password"
     )
 
     class Meta:
@@ -60,10 +61,14 @@ class UserUpdateForm(UserChangeForm):
 
     def clean_password(self):
         password = self.cleaned_data.get('password')
-        return make_password(password) if password else self.initial.get('password', '')
+
+        if password:
+            return make_password(password)
+
+        return self.initial.get('password', '')
 
 
-# ================= PROJECT FORM (FIXED RESPONSIVE) =================
+# ================= PROJECT FORM =================
 class ProjectForm(forms.ModelForm):
 
     class Meta:
@@ -78,12 +83,7 @@ class ProjectForm(forms.ModelForm):
             'Status': forms.Select(attrs={'class': 'form-select'}),
             'Created_By': forms.Select(attrs={'class': 'form-select'}),
             'Managed_By': forms.Select(attrs={'class': 'form-select'}),
-
-            # ✅ FIXED (IMPORTANT FOR RESPONSIVE)
-            'Members': forms.SelectMultiple(attrs={
-                'class': 'form-select',
-                'size': '5'
-            }),
+            'Members': forms.SelectMultiple(attrs={'class': 'form-control'}),
         }
 
     def __init__(self, *args, **kwargs):
@@ -99,15 +99,6 @@ class ProjectForm(forms.ModelForm):
 
 # ================= TASK FORM =================
 class TaskForm(forms.ModelForm):
-
-    def __init__(self, *args, **kwargs):
-        self.user = kwargs.pop('user', None)
-        super().__init__(*args, **kwargs)
-
-        # MANAGER restriction
-        if self.user and self.user.Role == 'MANAGER':
-            self.fields.pop('P_ID', None)
-            self.fields.pop('End', None)
 
     class Meta:
         model = Task
@@ -133,6 +124,7 @@ class CommentForm(forms.ModelForm):
         widgets = {
             'Text': forms.Textarea(attrs={
                 'class': 'form-control',
-                'rows': 2
+                'rows': 2,
+                'placeholder': 'Add your comment...'
             }),
         }
