@@ -81,8 +81,9 @@ class Task(models.Model):
 
     ID = models.BigAutoField(primary_key=True)
     Name = models.CharField(max_length=200)
-    Start = models.DateField()
-    End = models.DateField()
+
+    Start = models.DateField(null=True, blank=True)
+    End = models.DateField(null=True, blank=True)
 
     Status = models.CharField(
         max_length=50,
@@ -106,7 +107,6 @@ class Task(models.Model):
 
     def __str__(self):
         return self.Name
-
 
 # ================= COMMENT =================
 class Task_Comment(models.Model):

@@ -2,40 +2,67 @@
 {% block content %}
 
 <div class="container-fluid mt-3">
-
     <div class="row">
-
         {% if user_role == 'ADMIN' or user.is_superuser %}
-        <div class="col-md-4">
+        <div class="col-md-3">
             <div class="card text-white bg-primary mb-3">
                 <div class="card-body">
-                    <h5 class="card-title">Total Users</h5>
-                    <p class="card-text fs-3">{{ total_users }}</p>
+                    <h5>Total Users</h5>
+                    <h3>{{ total_users }}</h3>
                 </div>
             </div>
         </div>
         {% endif %}
 
-        <div class="col-md-4">
-            <div class="card text-white {% if user_role == 'ADMIN' %}bg-success{% else %}bg-warning{% endif %} mb-3">
+        <div class="col-md-3">
+            <div class="card text-white bg-success mb-3">
                 <div class="card-body">
-                    <h5 class="card-title">Total Projects</h5>
-                    <p class="card-text fs-3">{{ total_projects }}</p>
+                    <h5>Total Projects</h5>
+                    <h3>{{ total_projects }}</h3>
                 </div>
             </div>
         </div>
 
-        <div class="col-md-4">
-            <div class="card text-white {% if user_role == 'ADMIN' %}bg-info{% else %}bg-secondary{% endif %} mb-3">
+        <div class="col-md-3">
+            <div class="card text-white bg-info mb-3">
                 <div class="card-body">
-                    <h5 class="card-title">Total Tasks</h5>
-                    <p class="card-text fs-3">{{ total_tasks }}</p>
+                    <h5>Total Tasks</h5>
+                    <h3>{{ total_tasks }}</h3>
+                </div>
+            </div>
+        </div> 
+        {% if user_role == 'ADMIN' %}
+        <div class="col-md-3">
+            <div class="card text-white bg-dark mb-3">
+                <div class="card-body">
+                    <h5>Done Tasks</h5>
+                    <h3>{{ done_tasks }}</h3>
                 </div>
             </div>
         </div>
+        {% endif %}
 
     </div>
+    {% if user_role == 'ADMIN' %}
+    <div class="row">
 
+        <div class="col-md-4">
+            <div class="card text-white bg-warning mb-3">
+                <div class="card-body">
+                    <h5>In Progress Tasks</h5>
+                    <h3>{{ in_progress_tasks }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-white bg-danger mb-3">
+                <div class="card-body">
+                    <h5>Pending Tasks</h5>
+                    <h3>{{ pending_tasks }}</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
 </div>
-
 {% endblock %}
