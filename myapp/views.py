@@ -34,48 +34,34 @@ def logout_view(request):
 @login_required
 def dashboard(request):
     user = request.user
-
     if user.Role == 'ADMIN' or user.is_superuser:
-
         total_users = User.objects.count()
         total_projects = Project.objects.count()
         total_tasks = Task.objects.count()
-
-        # ✅ IMPORTANT: match EXACT model values
         done_tasks = Task.objects.filter(Status='Done').count()
         in_progress_tasks = Task.objects.filter(Status='In Progress').count()
         pending_tasks = Task.objects.filter(Status='Pending').count()
-
         recent_tasks = Task.objects.all().order_by('-ID')[:5]
-
     elif user.Role == 'MANAGER':
-
         projects = Project.objects.filter(
             Q(Created_By=user) | Q(Created_By__Role='ADMIN')
         )
-
         total_users = None
         total_projects = projects.count()
         total_tasks = Task.objects.filter(P_ID__in=projects).count()
-
         recent_tasks = Task.objects.filter(
             P_ID__in=projects
         ).order_by('-ID')[:5]
-
         done_tasks = in_progress_tasks = pending_tasks = None
 
     else:
 
         employee_tasks = Task.objects.filter(Assigned_To=user)
-
         total_users = None
         total_projects = Project.objects.filter(Members=user).count()
         total_tasks = employee_tasks.count()
-
         recent_tasks = employee_tasks.order_by('-ID')[:5]
-
         done_tasks = in_progress_tasks = pending_tasks = None
-
     return render(request, 'dashboard.html', {
         'user_role': user.Role,
         'total_users': total_users,
