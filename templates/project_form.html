@@ -20,30 +20,25 @@
                 </div>
 
                 <div class="card-body p-3 p-md-4">
-
                     <form method="POST">
-                        {% csrf_token %}
+            {% csrf_token %}
+               {% for field in form %}
+             <div class="mb-3">
 
-                        {% for field in form %}
-                            <div class="mb-3">
-
-                                <label class="form-label fw-semibold">
-                                    {{ field.label }}
-                                </label>
-
-                                {{ field }}
-
-                                {% if field.help_text %}
-                                    <small class="text-muted d-block">
-                                        {{ field.help_text }}
-                                    </small>
-                                {% endif %}
-
+            <label class="form-label fw-semibold">
+                 {{ field.label }}
+             </label>
+  {{ field }}
+  {% if field.help_text %}
+    <small class="text-muted d-block">
+        {{ field.help_text }}
+                 </small>
+                 {% endif %}
                                 {% if field.errors %}
                                     <div class="text-danger small">
                                         {{ field.errors }}
                                     </div>
-                                {% endif %}
+                      {% endif %}
 
                             </div>
                         {% endfor %}
@@ -63,4 +58,56 @@
  </div></div>
 
 </div>
+<script>
+function showToast(message, type="success") {
+
+    let bg = type === "success" ? "text-bg-success" : "text-bg-danger";
+    let html = `
+  <div class="toast align-items-center ${bg} border-0 show mb-2">
+     <div class="d-flex">
+     <div class="toast-body">${message}</div>
+       <button type="button" class="btn-close btn-close-white me-2 m-auto"
+      data-bs-dismiss="toast"></button>
+            </div>
+        </div>
+    `;
+    let container = document.getElementById("toast-container");
+    if(!container){
+   container = document.createElement("div");
+        container.id = "toast-container";
+  container.className = "position-fixed top-0 end-0 p-3";
+ container.style.zIndex = "9999";
+document.body.appendChild(container);
+    }
+    container.innerHTML += html;
+    setTimeout(()=>{
+        container.querySelector(".toast")?.remove();
+    }, 3000);}
+document.querySelector("form").addEventListener("submit", function(e){
+    e.preventDefault();
+let form = this;
+let formData = new FormData(form);
+    fetch("", {
+ method: "POST",
+ headers: {
+      "X-Requested-With": "XMLHttpRequest"   },
+        body: formData})
+    .then(res => res.json())
+    .then(data => {
+        if(data.success){
+    showToast(data.message, "success");
+  let url = data.redirect_url || "{% url 'project_list' %}";
+     setTimeout(()=>{
+                window.location.href = url;  }, 800);}
+        else{
+            showToast("Error occurred!", "error");
+            console.log(data);}
+    })
+    .catch(() => {
+        showToast("Something went wrong!", "error");
+    });
+
+});
+</script>
+
 {% endblock %}

@@ -9,6 +9,8 @@ from django.contrib.auth.hashers import make_password
 from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.hashers import check_password
 from .forms import UserCreateForm, UserUpdateForm, UserSelfUpdateForm
+from django.http import JsonResponse
+
 
 # ================= LOGIN =================
 def login_view(request):
@@ -53,9 +55,7 @@ def dashboard(request):
             P_ID__in=projects
         ).order_by('-ID')[:5]
         done_tasks = in_progress_tasks = pending_tasks = None
-
     else:
-
         employee_tasks = Task.objects.filter(Assigned_To=user)
         total_users = None
         total_projects = Project.objects.filter(Members=user).count()
@@ -81,21 +81,28 @@ def user_list(request):
     users = User.objects.all()
     return render(request, 'users.html', {
         'users': users,
-        'user_role': request.user.Role
-    })
+        'user_role': request.user.Role})
 @login_required
 def create_user(request):
     if request.user.Role != 'ADMIN':
         return redirect('dashboard')
     form = UserCreateForm(request.POST or None)
-    if form.is_valid():
-        form.save()
-        messages.success(request, "User created successfully!")
-        return redirect('user_list')
+    if request.method == "POST":
+        if form.is_valid():
+            form.save()
+            if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+                return JsonResponse({
+                "success": True,
+                 "message": "User created successfully!" })
+            messages.success(request, "User created successfully!")
+            return redirect('user_list')
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse({
+                "success": False,
+                "errors": form.errors})
     return render(request, 'user_form.html', {
         'form': form,
-        'user_role': request.user.Role
-    })
+        'user_role': request.user.Role})
 @login_required
 def edit_user(request, id):
     user_obj = get_object_or_404(User, id=id)
@@ -103,20 +110,28 @@ def edit_user(request, id):
         return redirect('dashboard')
     if request.user.Role == 'ADMIN':
         form = UserUpdateForm(request.POST or None, instance=user_obj)
-        if request.user.id != user_obj.id or request.user.id == user_obj.id:
+        if request.user.id != user_obj.id:
             form.fields.pop('password', None)
     else:
         form = UserSelfUpdateForm(request.POST or None, instance=user_obj)
-    if form.is_valid():
-        user = form.save()
-        if request.user.id == user.id:
-            update_session_auth_hash(request, user)
-        messages.success(request, "Profile updated successfully!")
-        return redirect('user_detail', id=user_obj.id)
+    if request.method == "POST":
+        if form.is_valid():
+            user = form.save()
+            if request.user.id == user.id:
+                update_session_auth_hash(request, user)
+            if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+                return JsonResponse({
+                    "success": True,
+                    "message": "Profile updated successfully!"  })
+            messages.success(request, "Profile updated successfully!")
+            return redirect('user_detail', id=user_obj.id)
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse({
+                "success": False,
+                "errors": form.errors})
     return render(request, 'user_form.html', {
         'form': form,
-        'user_role': request.user.Role
-    })
+        'user_role': request.user.Role })
 @login_required
 def delete_user(request, id):
     if request.user.Role != 'ADMIN':
@@ -157,32 +172,40 @@ def project_add(request):
     if request.user.Role not in ['ADMIN', 'MANAGER']:
         return redirect('dashboard')
     form = ProjectForm(request.POST or None)
+    is_ajax = request.headers.get('x-requested-with') == 'XMLHttpRequest'
     if form.is_valid():
         obj = form.save(commit=False)
         obj.Created_By = request.user
         obj.save()
         form.save_m2m()
         obj.Members.add(request.user)
+        if is_ajax:
+            return JsonResponse({
+        "success": True,
+        "message": "Project added successfully!"})
         messages.success(request, "Project added successfully!")
         return redirect('project_list')
     return render(request, 'project_form.html', {
         'form': form,
-        'user_role': request.user.Role
-    })
+        'user_role': request.user.Role})
 @login_required
 def project_edit(request, id):
     project = get_object_or_404(Project, ID=id)
     if request.user.Role not in ['ADMIN', 'MANAGER']:
         return redirect('dashboard')
     form = ProjectForm(request.POST or None, instance=project)
+    is_ajax = request.headers.get('x-requested-with') == 'XMLHttpRequest'
     if form.is_valid():
-        form.save()
+        obj = form.save()
+        if is_ajax:
+            return JsonResponse({
+                "success": True,
+                "message": "Project updated successfully!"})
         messages.success(request, "Project updated successfully!")
         return redirect('project_list')
     return render(request, 'project_form.html', {
         'form': form,
-        'user_role': request.user.Role
-    })
+        'user_role': request.user.Role})
 @login_required
 def project_delete(request, id):
     project = get_object_or_404(Project, ID=id)
@@ -236,17 +259,27 @@ def task_add(request):
     project = get_object_or_404(Project, ID=project_id)
     form = TaskForm(request.POST or None)
     form.fields['Assigned_To'].queryset = User.objects.filter(Role='EMPLOYEE')
-    if form.is_valid():
-        task = form.save(commit=False)
-        task.P_ID = project
-        task.save()
-        messages.success(request, "Task created successfully!")
-        return redirect('project_detail', id=project.ID)
+    is_ajax = request.headers.get('x-requested-with') == 'XMLHttpRequest'
+    if request.method == "POST":
+        if form.is_valid():
+            task = form.save(commit=False)
+            task.P_ID = project
+            task.save()
+            if is_ajax:
+                return JsonResponse({
+          "success": True,
+          "redirect_url": f"/project/{project.ID}/"})
+            messages.success(request, "Task created successfully!")
+            return redirect('project_detail', id=project.ID)
+        else:
+            if is_ajax:
+                return JsonResponse({
+            "success": False,
+            "errors": form.errors})
     return render(request, 'task_form.html', {
         'form': form,
         'project': project,
-        'user_role': request.user.Role
-    })
+        'user_role': request.user.Role})
 @login_required
 def task_edit(request, id):
     task = get_object_or_404(Task, ID=id)
@@ -256,32 +289,53 @@ def task_edit(request, id):
             if status:
                 task.Status = status
                 task.save()
+                if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+                    return JsonResponse({
+                    "status": "success",
+                    "message": "Task status updated successfully!"
+                    })
                 messages.success(request, "Task status updated successfully!")
         return redirect('project_detail', id=task.P_ID.ID)
     if request.user.Role == 'MANAGER':
         if request.method == "POST":
             if request.POST.get("remove_member"):
                 task.delete()
+                if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+                    return JsonResponse({
+                    "status": "deleted",
+                    "message": "Task deleted successfully!"
+                    })
                 messages.success(request, "Task deleted successfully!")
                 return redirect('project_detail', id=task.P_ID.ID)
             if task.Status == "In Progress":
-                messages.error(
-                    request,
-                    "Cannot change member while task is In Progress!"  )
+                if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+                    return JsonResponse({
+                    "status": "error",
+                     "message": "Cannot change member while task is In Progress!"
+                    })
+                messages.error(request, "Cannot change member while task is In Progress!")
                 return redirect('project_detail', id=task.P_ID.ID)
             if task.Status == "Done":
-                messages.error(
-                    request,
-                    "Cannot assign member. Task already completed!" )
+                if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+                    return JsonResponse({
+                    "status": "error",
+                    "message": "Cannot assign member. Task already completed!"
+                    })
+                messages.error(request, "Cannot assign member. Task already completed!")
                 return redirect('project_detail', id=task.P_ID.ID)
             assigned_to = request.POST.get("assigned_to")
             if assigned_to:
                 user = User.objects.get(id=assigned_to)
                 if user.Role == "EMPLOYEE":
-                    task.Assigned_To = user
+                 task.Assigned_To = user
                 else:
-                    task.Assigned_To = None
+                 task.Assigned_To = None
                 task.save()
+                if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+                    return JsonResponse({
+                    "status": "success",
+                    "message": "Task assigned successfully!"
+                    })
                 messages.success(request, "Task assigned successfully!")
                 return redirect('project_detail', id=task.P_ID.ID)
     return redirect('task_list')

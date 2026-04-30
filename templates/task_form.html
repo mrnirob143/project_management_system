@@ -9,10 +9,10 @@
                     <h4>{% if form.instance.pk %}Edit Task{% else %}Add Task{% endif %}</h4>
                 </div>
                 <div class="card-body">
-                    <form method="POST">
+
+                    <form method="POST" id="taskForm">
                         {% csrf_token %}
                         {{ form.as_p }}
-
                         <button type="submit" class="btn btn-info w-100 mt-2">
                             Submit
                         </button>
@@ -20,11 +20,42 @@
                         <a href="javascript:history.back()" class="btn btn-outline-secondary w-100 mt-2">
                             Back
                         </a>
-
                     </form>
+                    <div id="successMsg" class="alert alert-success mt-3 d-none">
+                        Task saved successfully!
+                    </div>
+
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<script>
+document.getElementById("taskForm").addEventListener("submit", function(e){
+    e.preventDefault();
+
+    let form = this;
+    let formData = new FormData(form);
+
+    fetch("", {
+        method: "POST",
+        headers: {
+            "X-Requested-With": "XMLHttpRequest"},
+        body: formData})
+    .then(response => response.json())
+    .then(data => {
+        if(data.success){
+            let msg = document.getElementById("successMsg");
+            msg.classList.remove("d-none");
+            form.reset();
+            setTimeout(function(){
+                window.location.href = data.redirect_url; }, 1000);
+        } else {
+            alert("Error occurred!");
+        }
+    })
+    .catch(error => console.log(error));
+});
+</script>
 {% endblock %}

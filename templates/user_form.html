@@ -9,18 +9,64 @@
                     <h4>{% if form.instance.pk %}Edit User{% else %}Add User{% endif %}</h4>
                 </div>
                 <div class="card-body">
-                    <form method="POST">
+                    <form method="POST" id="userForm">
                         {% csrf_token %}
                         {{ form.as_p }}
-                        <button type="submit" class="btn btn-primary w-100 mt-2">Submit</button>
+                        <button type="submit" class="btn btn-primary w-100 mt-2">
+                            Submit
+                        </button>
                     </form>
-
                     <a href="javascript:history.back()" class="btn btn-secondary w-100 mt-2">
                         Back
                     </a>
+                    <div id="successMsg" class="alert alert-success mt-3 d-none"></div>
+                    <div id="errorMsg" class="alert alert-danger mt-3 d-none"></div>
+
                 </div>
             </div>
         </div>
     </div>
 </div>
+<script>
+document.getElementById("userForm").addEventListener("submit", function(e){
+    e.preventDefault();
+    let form = this;
+    let formData = new FormData(form);
+    let successBox = document.getElementById("successMsg");
+    let errorBox = document.getElementById("errorMsg");
+    fetch("", {
+        method: "POST",
+        headers: {
+            "X-Requested-With": "XMLHttpRequest"},
+        body: formData})
+    .then(res => res.json())
+    .then(data => {
+        if(data.success){
+     successBox.classList.remove("d-none");
+        errorBox.classList.add("d-none");
+    successBox.innerText = data.message;
+    form.reset();
+    setTimeout(() => {
+    window.location.href = "/users/";
+            }, 800);}
+        else{
+ successBox.classList.add("d-none");
+     errorBox.classList.remove("d-none");
+ errorBox.innerHTML = "";
+    if(data.errors){
+      for(let field in data.errors){
+         errorBox.innerHTML += data.errors[field] + "<br>"; }
+       } else {
+    errorBox.innerText = "Validation failed!";
+       }
+        }
+    })
+    .catch(err => {
+     console.log(err);
+ errorBox.classList.remove("d-none");
+ errorBox.innerText = "Something went wrong!";
+    });
+
+});
+</script>
 {% endblock %}

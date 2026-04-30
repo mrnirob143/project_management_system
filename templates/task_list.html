@@ -8,7 +8,6 @@
 <a href="{% url 'task_add' %}" class="btn btn-primary mb-3">Add Task</a>
 {% endif %}
 
-<!-- ================= DESKTOP ================= -->
 <div class="d-none d-md-block">
     <table class="table table-bordered">
         <thead class="table-dark">
@@ -39,38 +38,23 @@
                 </td>
 
                 <td>
-                    {% if task.Status == "Done" %}
-                        <span class="badge bg-success">Done</span>
-                    {% elif task.Status == "In Progress" %}
-                        <span class="badge bg-info text-dark">In Progress</span>
-                    {% else %}
-                        <span class="badge bg-warning text-dark">Pending</span>
-                    {% endif %}
+                    <span class="badge 
+                        {% if task.Status == 'Done' %}bg-success
+                        {% elif task.Status == 'In Progress' %}bg-info text-dark
+                        {% else %}bg-warning text-dark
+                        {% endif %}
+                        status-badge-{{ task.ID }}">
+                        {{ task.Status }}
+                    </span>
                 </td>
 
                 <td>
-                    <form method="POST" action="{% url 'task_edit' task.pk %}">
-                        {% csrf_token %}
-
-                        <select name="Status"
-                                class="form-select form-select-sm"
-                                onchange="this.form.submit()">
-
-                            <option value="Pending" {% if task.Status == "Pending" %}selected{% endif %}>
-                                Pending
-                            </option>
-
-                            <option value="In Progress" {% if task.Status == "In Progress" %}selected{% endif %}>
-                                In Progress
-                            </option>
-
-                            <option value="Done" {% if task.Status == "Done" %}selected{% endif %}>
-                                Done
-                            </option>
-
-                        </select>
-
-                    </form>
+                    <select class="form-select form-select-sm status-dropdown"
+                            data-id="{{ task.ID }}">
+                        <option value="Pending" {% if task.Status == "Pending" %}selected{% endif %}>Pending</option>
+                        <option value="In Progress" {% if task.Status == "In Progress" %}selected{% endif %}>In Progress</option>
+                        <option value="Done" {% if task.Status == "Done" %}selected{% endif %}>Done</option>
+                    </select>
                 </td>
 
             </tr>
@@ -79,7 +63,6 @@
     </table>
 </div>
 
-<!-- ================= MOBILE ================= -->
 <div class="d-md-none">
 
     {% for task in tasks %}
@@ -104,37 +87,22 @@
 
             <p>
                 <b>Status:</b>
-                {% if task.Status == "Done" %}
-                    <span class="badge bg-success">Done</span>
-                {% elif task.Status == "In Progress" %}
-                    <span class="badge bg-info text-dark">In Progress</span>
-                {% else %}
-                    <span class="badge bg-warning text-dark">Pending</span>
-                {% endif %}
+                <span class="badge 
+                    {% if task.Status == 'Done' %}bg-success
+                    {% elif task.Status == 'In Progress' %}bg-info text-dark
+                    {% else %}bg-warning text-dark
+                    {% endif %}
+                    status-badge-{{ task.ID }}">
+                    {{ task.Status }}
+                </span>
             </p>
 
-            <form method="POST" action="{% url 'task_edit' task.pk %}">
-                {% csrf_token %}
-
-                <select name="Status"
-                        class="form-select"
-                        onchange="this.form.submit()">
-
-                    <option value="Pending" {% if task.Status == "Pending" %}selected{% endif %}>
-                        Pending
-                    </option>
-
-                    <option value="In Progress" {% if task.Status == "In Progress" %}selected{% endif %}>
-                        In Progress
-                    </option>
-
-                    <option value="Done" {% if task.Status == "Done" %}selected{% endif %}>
-                        Done
-                    </option>
-
-                </select>
-
-            </form>
+            <select class="form-select status-dropdown"
+                    data-id="{{ task.ID }}">
+                <option value="Pending" {% if task.Status == "Pending" %}selected{% endif %}>Pending</option>
+                <option value="In Progress" {% if task.Status == "In Progress" %}selected{% endif %}>In Progress</option>
+                <option value="Done" {% if task.Status == "Done" %}selected{% endif %}>Done</option>
+            </select>
 
         </div>
 
@@ -148,5 +116,62 @@
         ⬅ Back
     </a>
 </div>
+
+<div class="position-fixed top-0 end-0 p-3" style="z-index: 9999">
+
+    <div id="successToast" class="toast align-items-center text-bg-success border-0">
+        <div class="d-flex">
+            <div class="toast-body">
+                 Status updated successfully!
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+    </div>
+
+    <div id="errorToast" class="toast align-items-center text-bg-danger border-0">
+        <div class="d-flex">
+            <div class="toast-body">
+                 Something went wrong!
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+    </div>
+
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script>
+$(document).ready(function(){
+
+    $(".status-dropdown").change(function(){
+        var status = $(this).val();
+        var taskId = $(this).data("id");
+        $.ajax({
+            url: "/task/edit/" + taskId + "/",
+            type: "POST",
+            data: {
+                "Status": status,
+                "csrfmiddlewaretoken": "{{ csrf_token }}"},
+            success: function(){
+     var badge = $(".status-badge-" + taskId);
+badge.removeClass("bg-success bg-info bg-warning text-dark");
+    if(status == "Done"){
+        badge.addClass("bg-success").text("Done");}
+      else if(status == "In Progress"){
+      badge.addClass("bg-info text-dark").text("In Progress");}
+        else{
+      badge.addClass("bg-warning text-dark").text("Pending");}
+        var toast = new bootstrap.Toast(document.getElementById('successToast'));
+         toast.show(); },
+            error: function(){
+                var toast = new bootstrap.Toast(document.getElementById('errorToast'));
+                toast.show(); }
+        });
+
+    });
+
+});
+</script>
 
 {% endblock %}
