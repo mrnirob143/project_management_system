@@ -1,6 +1,153 @@
 {% extends 'base.html' %}
 
 {% block content %}
+<style>
+body {
+    background: #0b1220;
+    font-family: 'Inter', sans-serif;
+    color: #e5e7eb;
+}
+
+h4 {
+    color: #f9fafb;
+    font-weight: 700;
+    margin-bottom: 20px;
+}
+
+/* ================= PREMIUM SAAS BUTTON STYLE ================= */
+
+.btn-primary {
+    background: linear-gradient(135deg, #1e3a8a, #0f172a);
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    color: #e2e8f0;
+    border-radius: 12px;
+    padding: 10px 18px;
+    font-weight: 600;
+    transition: 0.3s ease;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.35);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    border-color: rgba(56, 189, 248, 0.35);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.45);
+}
+
+.btn-primary.small {
+    background: rgba(56, 189, 248, 0.08);
+    border: 1px solid rgba(56, 189, 248, 0.2);
+    color: #7dd3fc;
+    border-radius: 10px;
+    padding: 5px 10px;
+    font-size: 13px;
+}
+
+.btn-primary.small:hover {
+    background: rgba(56, 189, 248, 0.15);
+    transform: translateY(-2px);
+    color: #ffffff;
+}
+
+.btn-warning {
+    background: rgba(251, 191, 36, 0.08);
+    border: 1px solid rgba(251, 191, 36, 0.25);
+    color: #fde68a;
+    border-radius: 10px;
+    padding: 5px 10px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.btn-warning:hover {
+    background: rgba(251, 191, 36, 0.15);
+    transform: translateY(-2px);
+    color: #ffffff;
+}
+
+.btn-danger {
+    background: rgba(248, 113, 113, 0.08);
+    border: 1px solid rgba(248, 113, 113, 0.25);
+    color: #fca5a5;
+    border-radius: 10px;
+    padding: 5px 10px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.btn-danger:hover {
+    background: rgba(248, 113, 113, 0.15);
+    transform: translateY(-2px);
+    color: #ffffff;
+}
+
+.btn-secondary {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.12);
+    color: #e5e7eb;
+    border-radius: 10px;
+    padding: 8px 14px;
+}
+
+.btn-secondary:hover {
+    background: rgba(255,255,255,0.10);
+    transform: translateY(-2px);
+}
+
+.project-card {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 14px;
+    padding: 16px;
+    transition: 0.3s ease;
+    flex: 1 1 280px;
+    min-width: 260px;
+}
+
+.project-card:hover {
+    transform: translateY(-5px);
+    background: rgba(56,189,248,0.05);
+    box-shadow: 0 18px 40px rgba(0,0,0,0.4);
+}
+
+.project-title {
+    color: #f9fafb;
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+.project-text {
+    color: #cbd5e1;
+    font-size: 14px;
+    margin-bottom: 6px;
+}
+
+.project-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+/* ================= ONLY PDF BUTTON (DETAILS STYLE + PURPLE) ================= */
+
+.pdf-btn {
+    background: rgba(168, 85, 247, 0.10);   /* purple soft */
+    border: 1px solid rgba(168, 85, 247, 0.25);
+    color: #c4b5fd;
+    border-radius: 10px;
+    padding: 5px 10px;
+    font-size: 13px;
+    font-weight: 600;
+    transition: 0.3s ease;
+}
+
+.pdf-btn:hover {
+    background: rgba(168, 85, 247, 0.18);
+    transform: translateY(-2px);
+    color: #ffffff;
+    border-color: rgba(168, 85, 247, 0.4);
+}
+
+</style>
 
 <div class="container mt-4">
 
@@ -8,109 +155,57 @@
 
     {% if user_role == 'ADMIN' %}
     <div class="mb-3">
-        <a href="{% url 'project_add' %}" class="btn btn-primary">
-            Add Project
-        </a>
+        <a href="{% url 'project_add' %}" class="btn btn-primary">Add Project</a>
     </div>
     {% endif %}
 
-    <div class="d-none d-md-block table-responsive">
-        <table class="table table-bordered table-hover table-striped">
-
-            <thead class="table-dark">
-                <tr>
-                    <th>ID</th>
-                    <th>Name</th>
-                    <th>Description</th>
-                    <th>Created By</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-
-            <tbody>
-                {% for project in projects %}
-                <tr>
-                    <td>{{ project.ID }}</td>
-                    <td>{{ project.Name }}</td>
-                    <td>{{ project.Desc }}</td>
-                    <td>{{ project.Created_By.username }}</td>
-
-                    <td>
-
-                        {% if user_role != 'EMPLOYEE' %}
-                        <a href="{% url 'project_edit' project.ID %}" 
-                           class="btn btn-sm btn-warning">
-                            Edit
-                        </a>
-                        {% endif %}
-
-                        {% if user_role == 'ADMIN' %}
-                        <form method="POST" action="{% url 'project_delete' project.ID %}" style="display:inline;">
-                            {% csrf_token %}
-                            <button type="submit" class="btn btn-sm btn-danger"
-                                    onclick="return confirm('Are you sure?')">
-                                Delete
-                            </button>
-                        </form>
-                        {% endif %}
-
-                        <a href="{% url 'project_detail' project.ID %}" 
-                           class="btn btn-sm btn-primary">
-                            Details
-                        </a>
-
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-
-        </table>
-    </div>
-
-    <div class="d-md-none">
+    <div class="project-grid">
 
         {% for project in projects %}
-        <div class="card mb-3 shadow-sm">
+        <div class="project-card">
 
-            <div class="card-body">
+            <div class="project-title">
+                {{ project.Name }} (ID: {{ project.ID }})
+            </div>
 
-                <h5 class="card-title">
-                    {{ project.Name }} (ID: {{ project.ID }})
-                </h5>
+            <div class="project-text">
+                <strong>Description:</strong> {{ project.Desc }}
+            </div>
 
-                <p class="card-text">
-                    <strong>Description:</strong> {{ project.Desc }}
-                </p>
+            <div class="project-text">
+                <strong>Created By:</strong> {{ project.Created_By.username }}
+            </div>
 
-                <p class="card-text">
-                    <strong>Created By:</strong> {{ project.Created_By.username }}
-                </p>
+            <div class="d-flex flex-wrap gap-2 mt-3">
 
-                <div class="d-flex flex-wrap gap-2">
+                {% if user_role != 'EMPLOYEE' %}
+                <a href="{% url 'project_edit' project.ID %}" 
+                   class="btn btn-sm btn-warning">
+                   Edit
+                </a>
+                {% endif %}
 
-                    {% if user_role != 'EMPLOYEE' %}
-                    <a href="{% url 'project_edit' project.ID %}" 
-                       class="btn btn-sm btn-warning">
-                        Edit
-                    </a>
-                    {% endif %}
+                {% if user_role == 'ADMIN' %}
+                <form method="POST" action="{% url 'project_delete' project.ID %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-sm btn-danger">
+                        Delete
+                    </button>
+                </form>
+                {% endif %}
 
-                    {% if user_role == 'ADMIN' %}
-                    <form method="POST" action="{% url 'project_delete' project.ID %}">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-sm btn-danger"
-                                onclick="return confirm('Are you sure?')">
-                            Delete
-                        </button>
-                    </form>
-                    {% endif %}
+                <a href="{% url 'project_detail' project.ID %}" 
+                   class="btn btn-sm btn-primary small">
+                   Details
+                </a>
 
-                    <a href="{% url 'project_detail' project.ID %}" 
-                       class="btn btn-sm btn-primary">
-                        Details
-                    </a>
-
-                </div>
+                {# ================= PDF BUTTON ================= #}
+                {% if user_role == 'MANAGER' %}
+                <a href="{% url 'project_download_pdf' project.ID %}" 
+                   class="btn btn-sm pdf-btn small">
+                   PDF
+                </a>
+                {% endif %}
 
             </div>
 

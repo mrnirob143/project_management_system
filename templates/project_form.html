@@ -1,113 +1,182 @@
 {% extends 'base.html' %}
-
 {% block content %}
-<div class="container mt-3 mt-md-4">
+<style>
+body {
+    background: #0b1220;
+    font-family: 'Inter', sans-serif;
+    color: #e5e7eb;
+}
+.auth-wrapper {
+    min-height: 80vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.card {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.10);
+    border-radius: 16px;
+    box-shadow: 0 18px 45px rgba(0,0,0,0.45);
+    overflow: hidden;
+}
+.card-header {
+    background: linear-gradient(135deg, #38bdf8, #1e293b);
+    border: none;
+    padding: 16px;
+    text-align: center;
+}
+.card-header h4 {
+    margin: 0;
+    color: #ffffff;
+    font-weight: 600;
+}
+.card-body {
+    padding: 24px;
+    color: #f1f5f9;
+}
+input, select, textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.15);
+    background: rgba(15,23,42,0.75);
+    color: #ffffff;
+    outline: none;
+}
+.btn-primary {
+    background: linear-gradient(135deg, #38bdf8, #1e293b);
+    border: none;
+    color: white;
+    border-radius: 10px;
+    padding: 10px;
+    font-weight: 500;
+}
+.btn-secondary {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.15);
+    color: #e5e7eb;
+    border-radius: 10px;
+}
+</style>
+<div class="auth-wrapper">
 
-    <div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
 
-        <div class="col-12 col-sm-11 col-md-8 col-lg-6">
+        <div class="card">
 
-            <div class="card shadow border-0 rounded-4">
-
-                <div class="card-header bg-success text-white text-center rounded-top-4">
-                    <h5 class="mb-0">
-                        {% if form.instance.pk %}
-                            Edit Project
-                        {% else %}
-                            Add Project
-                        {% endif %}
-                    </h5>
-                </div>
-
-                <div class="card-body p-3 p-md-4">
-                    <form method="POST">
-            {% csrf_token %}
-               {% for field in form %}
-             <div class="mb-3">
-
-            <label class="form-label fw-semibold">
-                 {{ field.label }}
-             </label>
-  {{ field }}
-  {% if field.help_text %}
-    <small class="text-muted d-block">
-        {{ field.help_text }}
-                 </small>
-                 {% endif %}
-                                {% if field.errors %}
-                                    <div class="text-danger small">
-                                        {{ field.errors }}
-                                    </div>
-                      {% endif %}
-
-                            </div>
-                        {% endfor %}
-                        <button type="submit" class="btn btn-success w-100 mt-2">
-                            Submit
-                        </button>
-
-                    </form>
-
-                    <a href="javascript:history.back()" class="btn btn-secondary w-100 mt-2">
-                        Back
-          </a>
-
-      </div>
-
+            <div class="card-header">
+                <h4>
+                    {% if form.instance.pk %}
+                        Edit Project
+                    {% else %}
+                        Add Project
+                    {% endif %}
+                </h4>
             </div>
- </div></div>
+            <div class="card-body">
+                <form method="POST" enctype="multipart/form-data" id="projectForm">
+                    {% csrf_token %}
+                    {% for field in form.visible_fields %}
+                    <div class="mb-3">
+                        <label class="form-label">
+                            {{ field.label }}
+                        </label>
+                        {% if field.name == "Created_By" %}
+                            <div class="form-control"
+                                 style="background: rgba(15,23,42,0.75);
+                                        color:white;
+                                        border:1px solid rgba(255,255,255,0.15);
+                                        pointer-events:none;">
+                                {{ form.instance.Created_By.username|default:"-" }}
+                            </div>
+                        {% else %}
+                            {{ field }}
+                        {% endif %}
+                        {% if field.errors %}
+                            <div class="text-danger small">
+                                {{ field.errors }}
+                            </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                    <div class="mb-3">
+                        <label class="form-label">Project Files</label>
+                        <input type="file" name="files" class="form-control" multiple>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100 mt-2">
+                        Submit
+                    </button>
+                </form>
+                <a href="javascript:history.back()" class="btn btn-secondary w-100 mt-2">
+                    Back
+                </a>
 
+                <div id="file-preview" class="mt-2 text-muted small"></div>
+
+            </div> </div> </div>
 </div>
 <script>
 function showToast(message, type="success") {
-
     let bg = type === "success" ? "text-bg-success" : "text-bg-danger";
-    let html = `
-  <div class="toast align-items-center ${bg} border-0 show mb-2">
-     <div class="d-flex">
-     <div class="toast-body">${message}</div>
-       <button type="button" class="btn-close btn-close-white me-2 m-auto"
-      data-bs-dismiss="toast"></button>
-            </div>
-        </div>
-    `;
+
     let container = document.getElementById("toast-container");
+
     if(!container){
-   container = document.createElement("div");
+        container = document.createElement("div");
         container.id = "toast-container";
-  container.className = "position-fixed top-0 end-0 p-3";
- container.style.zIndex = "9999";
-document.body.appendChild(container);
+        container.className = "position-fixed top-0 end-0 p-3";
+        container.style.zIndex = "9999";
+        document.body.appendChild(container);
     }
-    container.innerHTML += html;
-    setTimeout(()=>{
-        container.querySelector(".toast")?.remove();
-    }, 3000);}
-document.querySelector("form").addEventListener("submit", function(e){
+
+    let toast = document.createElement("div");
+    toast.className = `toast align-items-center ${bg} border-0 show mb-2`;
+    toast.innerHTML = `
+        <div class="d-flex">
+            <div class="toast-body">${message}</div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto"></button>
+        </div>`;
+    container.appendChild(toast);
+    setTimeout(() => {
+        toast.remove();
+    }, 1500);
+}
+</script>
+<script>
+let fileInput = document.querySelector('input[name="files"]');
+if(fileInput){
+    fileInput.addEventListener('change', function(){
+        let preview = document.getElementById("file-preview");
+        preview.innerHTML = "";
+        for(let i = 0; i < this.files.length; i++){
+            preview.innerHTML += "📎 " + this.files[i].name + "<br>";}
+    });
+}
+</script>
+<script>
+document.getElementById("projectForm").addEventListener("submit", function(e){
     e.preventDefault();
-let form = this;
-let formData = new FormData(form);
+    let form = this;
+    let formData = new FormData(form);
     fetch("", {
- method: "POST",
- headers: {
-      "X-Requested-With": "XMLHttpRequest"   },
-        body: formData})
+        method: "POST",
+        headers: {
+            "X-Requested-With": "XMLHttpRequest"},
+        body: formData
+    })
     .then(res => res.json())
     .then(data => {
         if(data.success){
-    showToast(data.message, "success");
-  let url = data.redirect_url || "{% url 'project_list' %}";
-     setTimeout(()=>{
-                window.location.href = url;  }, 800);}
-        else{
-            showToast("Error occurred!", "error");
-            console.log(data);}
+            showToast(data.message || "Success!", "success");
+            setTimeout(()=> {
+                window.location.href = "/projects/";
+            }, 800);
+        } else {
+            showToast("Error occurred!", "error"); }
     })
     .catch(() => {
         showToast("Something went wrong!", "error");
     });
-
 });
 </script>
-
 {% endblock %}

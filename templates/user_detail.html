@@ -1,83 +1,265 @@
 {% extends 'base.html' %}
 {% block content %}
 
-<div class="container-fluid py-4 py-md-5">
+<style>
+body {
+    background: linear-gradient(135deg, #0b1220, #0f172a, #020617);
+    font-family: 'Inter', sans-serif;
+    color: #e5e7eb;
+}
+
+/* CARD */
+.card {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(14px);
+    border-radius: 18px;
+    overflow: hidden;
+    transition: 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 25px 60px rgba(0,0,0,0.5);
+}
+
+/* HEADER */
+.card-header {
+    background: linear-gradient(135deg, rgba(14,165,233,0.15), rgba(2,6,23,0.9)) !important;
+    border-bottom: 1px solid rgba(56, 189, 248, 0.2);
+}
+
+.card-header h4 {
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+/* TITLE */
+h3 {
+    color: #f8fafc;
+    font-weight: 700;
+}
+
+/* BADGE */
+.badge {
+    background: linear-gradient(135deg, #38bdf8, #6366f1) !important;
+    padding: 8px 14px;
+    border-radius: 999px;
+    font-weight: 500;
+}
+
+/* INFO BOX */
+.bg-light {
+    background: rgba(255,255,255,0.03) !important;
+    border: 1px solid rgba(255,255,255,0.06) !important;
+    border-radius: 14px;
+    transition: 0.25s ease;
+}
+
+.bg-light:hover {
+    transform: translateY(-3px);
+    border-color: rgba(56, 189, 248, 0.3);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+}
+
+/* TEXT */
+small.text-muted {
+    color: #94a3b8 !important;
+}
+
+strong {
+    color: #f1f5f9;
+}
+
+/* ================= PREMIUM BUTTON SYSTEM (FIXED) ================= */
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 6px;
+
+    padding: 6px 12px;
+    font-size: 12px;
+    font-weight: 600;
+
+    border-radius: 10px;
+    border: 1px solid transparent;
+
+    line-height: 1;
+    white-space: nowrap;
+
+    transition: 0.25s ease;
+}
+
+/* PRIMARY */
+.btn-primary {
+    background: linear-gradient(135deg, #1e3a8a, #0f172a);
+    border: 1px solid rgba(148, 163, 184, 0.18);
+    color: #e2e8f0;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    border-color: rgba(56, 189, 248, 0.35);
+}
+
+/* SMALL PRIMARY */
+.btn-primary.small {
+    background: rgba(56, 189, 248, 0.08);
+    border: 1px solid rgba(56, 189, 248, 0.18);
+    color: #7dd3fc;
+    padding: 5px 10px;
+}
+
+.btn-primary.small:hover {
+    background: rgba(56, 189, 248, 0.15);
+    color: #ffffff;
+}
+
+/* EDIT */
+.btn-warning {
+    background: rgba(251, 191, 36, 0.08);
+    border: 1px solid rgba(251, 191, 36, 0.22);
+    color: #fde68a;
+}
+
+.btn-warning:hover {
+    background: rgba(251, 191, 36, 0.15);
+    color: #ffffff;
+    transform: translateY(-2px);
+}
+
+/* DELETE */
+.btn-danger {
+    background: rgba(248, 113, 113, 0.08);
+    border: 1px solid rgba(248, 113, 113, 0.22);
+    color: #fca5a5;
+}
+
+.btn-danger:hover {
+    background: rgba(248, 113, 113, 0.15);
+    color: #ffffff;
+    transform: translateY(-2px);
+}
+
+/* SECONDARY */
+.btn-secondary {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.12);
+    color: #e5e7eb;
+}
+
+.btn-secondary:hover {
+    background: rgba(255,255,255,0.12);
+    color: #ffffff;
+}
+
+/* ANIMATION */
+.card-body {
+    animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+</style>
+
+<div class="container-fluid">
     <div class="row justify-content-center">
         <div class="col-12 col-sm-11 col-md-9 col-lg-7 col-xl-6">
-        <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
-         <div class="card-header bg-dark text-white text-center py-3 py-md-4">
-                <h4 class="mb-0">👤 User Details</h4>
+
+            <div class="card shadow-lg">
+
+                <div class="card-header text-white text-center py-4">
+                    <h4 class="mb-0">👤 User Details</h4>
                 </div>
-                <div class="card-body p-3 p-md-4">
-                    <div class="text-center mb-3 mb-md-4">
-                        <h3 class="fw-bold mb-1">
-                            {{ user_obj.username }}
-                        </h3>
-                        <span class="badge bg-primary px-3 py-2">
-                            {{ user_obj.Role }}
-                        </span>
+
+                <div class="card-body p-4">
+
+                    <!-- NAME -->
+                    <div class="text-center mb-4">
+                        <h3 class="mb-1">{{ user_obj.username }}</h3>
+                        <span class="badge">{{ user_obj.Role }}</span>
                     </div>
+
                     <hr>
+
+                    <!-- INFO GRID -->
                     <div class="row g-3">
+
                         <div class="col-12 col-md-6">
-                            <div class="p-3 border rounded-3 bg-light">
+                            <div class="p-3 bg-light">
                                 <small class="text-muted">Email</small><br>
                                 <strong>{{ user_obj.email }}</strong>
                             </div>
                         </div>
+
                         <div class="col-12 col-md-6">
-                            <div class="p-3 border rounded-3 bg-light">
+                            <div class="p-3 bg-light">
                                 <small class="text-muted">Phone</small><br>
                                 <strong>{{ user_obj.Phone }}</strong>
                             </div>
                         </div>
+
                         <div class="col-12 col-md-6">
-                            <div class="p-3 border rounded-3 bg-light">
+                            <div class="p-3 bg-light">
                                 <small class="text-muted">Department</small><br>
                                 <strong>{{ user_obj.Dept }}</strong>
                             </div>
                         </div>
+
                         <div class="col-12 col-md-6">
-                            <div class="p-3 border rounded-3 bg-light">
+                            <div class="p-3 bg-light">
                                 <small class="text-muted">Post</small><br>
                                 <strong>{{ user_obj.Post }}</strong>
                             </div>
                         </div>
+
+                    </div>
+
+                    <!-- JOIN DATE CENTER -->
+                    <div class="row justify-content-center mt-3">
                         <div class="col-12 col-md-6">
-                            <div class="p-3 border rounded-3 bg-light">
+                            <div class="p-3 bg-light text-center">
                                 <small class="text-muted">Join Date</small><br>
                                 <strong>{{ user_obj.JoinDate }}</strong>
                             </div>
                         </div>
-                        <div class="col-12 col-md-6">
-                            <div class="p-3 border rounded-3 bg-light">
-                                <small class="text-muted">User ID</small><br>
-                                <strong>#{{ user_obj.id }}</strong>
-                            </div>
-                        </div>
                     </div>
+
                     <hr class="my-4">
+
+                    <!-- ACTIONS -->
                     <div class="d-grid gap-2 d-md-flex">
+
                         <a href="{% url 'user_list' %}"
-                           class="btn btn-secondary w-100 py-2 py-md-3 rounded-3 fw-semibold">
-                            ⬅ Back
+                           class="btn btn-secondary w-100 py-3">
+                           ⬅ Back
                         </a>
-                        {% if request.user.id == user_obj.id or request.user.Role == 'ADMIN' %}
+
+                        {# ✅ ONLY USER CAN SEE EDIT (ADMIN EXCLUDED FOR OTHERS) #}
+                        {% if request.user.id == user_obj.id %}
                         <a href="{% url 'edit_user' user_obj.id %}"
-                           class="btn btn-warning w-100 py-2 py-md-3 rounded-3 fw-semibold">
-                            ✏ Edit
+                           class="btn btn-warning w-100 py-3">
+                           ✏ Edit
                         </a>
                         {% endif %}
+
                         {% if request.user.id == user_obj.id %}
                         <a href="{% url 'reset_user_password' user_obj.id %}"
-                           class="btn btn-danger w-100 py-2 py-md-3 rounded-3 fw-semibold">
-                            🔐 Reset Password
+                           class="btn btn-danger w-100 py-3">
+                           🔐 Reset Password
                         </a>
                         {% endif %}
 
                     </div>
+
                 </div>
             </div>
+
         </div>
     </div>
 </div>

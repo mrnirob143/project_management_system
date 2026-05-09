@@ -1,13 +1,102 @@
 {% extends 'base.html' %}
 
 {% block content %}
-
+<style>
+.content {
+    background: linear-gradient(135deg, #0b1220, #0f172a);
+    font-family: 'Inter', sans-serif;
+    color: #cbd5e1;
+}
+.content h2 {
+    color: #e5e7eb !important;
+    font-weight: 600;
+}
+.content .btn-primary {
+    background: linear-gradient(135deg, #38bdf8, #1e293b) !important;
+    border: none !important;
+    border-radius: 10px;
+    color: #fff !important;
+}
+.content .table {
+    border-collapse: separate;
+    border-spacing: 0 12px;
+}
+.content .table th,
+.content .table td {
+    background: transparent !important;
+    border: none !important;
+}
+.content .table td {
+    color: #cbd5e1 !important;
+    padding: 14px 12px;
+    vertical-align: middle;
+}
+.content .table thead th {
+    background: rgba(15, 23, 42, 0.85) !important;
+    color: #94a3b8 !important;
+    font-size: 12px;
+    text-transform: uppercase;
+    padding: 14px;
+    letter-spacing: 0.6px;
+}
+.content .table tbody tr {
+    background: rgba(15, 23, 42, 0.55) !important;
+    transition: 0.25s ease;
+}
+.content .table tbody tr:hover {
+    background: rgba(30, 41, 59, 0.75) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.4);
+}
+.content .table td:first-child {
+    font-weight: 600;
+    color: #e5e7eb !important;
+}
+.content .badge {
+    border-radius: 999px;
+    padding: 6px 10px;
+    font-size: 12px;
+}
+.content .bg-success {
+    background: linear-gradient(135deg, #22c55e, #16a34a) !important;
+    color: #0b1220 !important;
+}
+.content .bg-info {
+    background: linear-gradient(135deg, #38bdf8, #0ea5e9) !important;
+    color: #0b1220 !important;
+}
+.content .bg-warning {
+    background: linear-gradient(135deg, #f59e0b, #d97706) !important;
+    color: #0b1220 !important;
+}
+.content select.form-select {
+    background: rgba(15, 23, 42, 0.9) !important;
+    color: #e5e7eb !important;
+    border: 1px solid rgba(56, 189, 248, 0.2) !important;
+    border-radius: 10px;
+    padding-right: 30px !important;
+    appearance: auto !important;
+    background-repeat: no-repeat !important;
+    background-position: right 12px center !important;
+    background-size: 10px !important;
+}
+.content .card {
+    background: rgba(15, 23, 42, 0.55) !important;
+    border: 1px solid rgba(56, 189, 248, 0.08) !important;
+    border-radius: 14px;
+}
+.content .text-muted {
+    color: #94a3b8 !important;
+}
+.content .toast {
+    border-radius: 12px;
+    backdrop-filter: blur(10px);
+}
+</style>
 <h2>Tasks</h2>
-
 {% if user_role != 'EMPLOYEE' %}
 <a href="{% url 'task_add' %}" class="btn btn-primary mb-3">Add Task</a>
 {% endif %}
-
 <div class="d-none d-md-block">
     <table class="table table-bordered">
         <thead class="table-dark">
@@ -19,24 +108,19 @@
                 <th>Action</th>
             </tr>
         </thead>
-
         <tbody>
             {% for task in tasks %}
             <tr>
-
                 <td>{{ task.Name }}</td>
                 <td>{{ task.P_ID.Name }}</td>
-
                 <td>
                     {% if task.Assigned_To %}
-                        <span class="badge bg-secondary">
-                            {{ task.Assigned_To.username }}
-                        </span>
+                 <span class="badge bg-secondary">
+                     {{ task.Assigned_To.username }}</span>
                     {% else %}
                         <span class="text-muted">Not assigned</span>
                     {% endif %}
                 </td>
-
                 <td>
                     <span class="badge 
                         {% if task.Status == 'Done' %}bg-success
@@ -47,7 +131,6 @@
                         {{ task.Status }}
                     </span>
                 </td>
-
                 <td>
                     <select class="form-select form-select-sm status-dropdown"
                             data-id="{{ task.ID }}">
@@ -56,37 +139,27 @@
                         <option value="Done" {% if task.Status == "Done" %}selected{% endif %}>Done</option>
                     </select>
                 </td>
-
             </tr>
             {% endfor %}
         </tbody>
     </table>
 </div>
-
 <div class="d-md-none">
-
     {% for task in tasks %}
     <div class="card mb-3 shadow-sm">
-
         <div class="card-body">
-
             <h5>{{ task.Name }}</h5>
-
             <p><b>Project:</b> {{ task.P_ID.Name }}</p>
-
-            <p>
-                <b>Assigned To:</b>
+            <p> <b>Assigned To:</b>
                 {% if task.Assigned_To %}
                     <span class="badge bg-secondary">
                         {{ task.Assigned_To.username }}
                     </span>
                 {% else %}
                     <span class="text-muted">Not assigned</span>
-                {% endif %}
-            </p>
-
+                {% endif %}</p>
             <p>
-                <b>Status:</b>
+            <b>Status:</b>
                 <span class="badge 
                     {% if task.Status == 'Done' %}bg-success
                     {% elif task.Status == 'In Progress' %}bg-info text-dark
@@ -94,31 +167,21 @@
                     {% endif %}
                     status-badge-{{ task.ID }}">
                     {{ task.Status }}
-                </span>
-            </p>
-
+                </span></p>
             <select class="form-select status-dropdown"
                     data-id="{{ task.ID }}">
                 <option value="Pending" {% if task.Status == "Pending" %}selected{% endif %}>Pending</option>
                 <option value="In Progress" {% if task.Status == "In Progress" %}selected{% endif %}>In Progress</option>
                 <option value="Done" {% if task.Status == "Done" %}selected{% endif %}>Done</option>
             </select>
-
         </div>
-
     </div>
     {% endfor %}
-
 </div>
-
 <div class="mt-4">
-    <a href="javascript:history.back()" class="btn btn-secondary">
-        ⬅ Back
-    </a>
+    <a href="javascript:history.back()" class="btn btn-secondary">  ⬅ Back </a>
 </div>
-
 <div class="position-fixed top-0 end-0 p-3" style="z-index: 9999">
-
     <div id="successToast" class="toast align-items-center text-bg-success border-0">
         <div class="d-flex">
             <div class="toast-body">
@@ -127,7 +190,6 @@
             <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
         </div>
     </div>
-
     <div id="errorToast" class="toast align-items-center text-bg-danger border-0">
         <div class="d-flex">
             <div class="toast-body">
@@ -136,14 +198,10 @@
             <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
         </div>
     </div>
-
 </div>
-
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
 <script>
 $(document).ready(function(){
-
     $(".status-dropdown").change(function(){
         var status = $(this).val();
         var taskId = $(this).data("id");
@@ -168,10 +226,8 @@ badge.removeClass("bg-success bg-info bg-warning text-dark");
                 var toast = new bootstrap.Toast(document.getElementById('errorToast'));
                 toast.show(); }
         });
-
     });
 
 });
 </script>
-
 {% endblock %}

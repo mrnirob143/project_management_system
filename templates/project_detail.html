@@ -1,6 +1,184 @@
 {% extends 'base.html' %}
 {% block content %}
+
+<style>
+body {
+    background: linear-gradient(135deg, #0b1220, #0f172a);
+    font-family: 'Inter', sans-serif;
+    color: #e5e7eb;
+}
+p, span, td, th, li, small, label {
+    color: #e5e7eb !important;
+}
+
+.text-muted {
+    color: #94a3b8 !important;
+}
+h1, h2, h3, h4, h5 {
+    color: #f8fafc;
+    font-weight: 600;
+}
+.card {
+    background: rgba(255,255,255,0.04) !important;
+    border: 1px solid rgba(255,255,255,0.08) !important;
+    border-radius: 16px;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.35);
+}
+
+.btn-primary,
+.btn-success {
+    background: linear-gradient(135deg, #1e3a8a, #0f172a);
+    border: 1px solid rgba(148, 163, 184, 0.25);
+    color: #e2e8f0;
+    border-radius: 12px;
+    font-weight: 600;
+    padding: 10px 18px;
+    transition: 0.25s ease;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.35);
+}
+
+/* HOVER (same for both) */
+.btn-primary:hover,
+.btn-success:hover {
+    transform: translateY(-2px);
+    border-color: rgba(56, 189, 248, 0.4);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.45);
+    color: #ffffff;
+}
+.btn-secondary {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: #fff;
+    border-radius: 10px;
+}
+
+.nav-tabs {
+    border-bottom: 1px solid rgba(255,255,255,0.12);
+}
+
+.nav-tabs .nav-link {
+    color: #cbd5e1 !important;
+    border: none;
+    border-radius: 10px;
+}
+
+.nav-tabs .nav-link.active {
+    background: linear-gradient(135deg, #38bdf8, #1e293b);
+    color: #fff !important;
+}
+.table {
+    background-color: transparent !important;
+    --bs-table-bg: transparent !important;
+    --bs-table-hover-bg: transparent !important;
+    --bs-table-striped-bg: transparent !important;
+    color: #e5e7eb !important;
+}
+
+#tasks .table {
+    border-collapse: separate;
+    border-spacing: 0 10px;
+}
+#tasks thead th {
+    background: rgba(15, 23, 42, 0.75) !important;
+    color: #94a3b8 !important;
+    border: none !important;
+    padding: 14px;
+    font-size: 12px;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+}
+#tasks tbody tr {
+    background: rgba(15, 23, 42, 0.55) !important;
+    border: 1px solid rgba(56, 189, 248, 0.08) !important;
+    transition: 0.25s ease;
+}
+#tasks td {
+    border: none !important;
+    padding: 14px 12px;
+    vertical-align: middle;
+    color: #e2e8f0 !important;
+    overflow: visible !important;
+    min-height: 40px;
+}
+#tasks tbody tr:hover {
+    background: rgba(30, 41, 59, 0.70) !important;
+    border: 1px solid rgba(56, 189, 248, 0.25) !important;
+    box-shadow: 0 12px 28px rgba(0,0,0,0.45);
+    transform: translateY(-2px);
+}
+#tasks td:first-child {
+    font-weight: 600;
+    color: #f1f5f9 !important;
+}
+
+#tasks select.form-select {
+    background: rgba(15, 23, 42, 0.95) !important;
+    color: #e2e8f0 !important;
+    border: 1px solid rgba(56, 189, 248, 0.15) !important;
+    display: block !important;
+    width: 100% !important;
+    min-width: 140px;
+    position: relative !important;
+    z-index: 9999 !important;
+}
+#files .table {
+    border-collapse: separate;
+    border-spacing: 0 10px;
+}
+#files thead th {
+    background: rgba(15, 23, 42, 0.75) !important;
+    color: #94a3b8 !important;
+    border: none !important;
+    padding: 12px;
+    font-size: 12px;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+#files tbody tr {
+    background: rgba(15, 23, 42, 0.55) !important;
+    border: 1px solid rgba(56, 189, 248, 0.08) !important;
+    transition: 0.25s ease;
+}
+#files td {
+    border: none !important;
+    padding: 14px 12px;
+    color: #e2e8f0 !important;
+}
+#files td:nth-child(2) {
+    font-weight: 600;
+    color: #f8fafc !important;
+}
+#files tbody tr:hover {
+    background: rgba(30, 41, 59, 0.65) !important;
+    border: 1px solid rgba(56, 189, 248, 0.25) !important;
+    box-shadow: 0 12px 28px rgba(0,0,0,0.4);
+    transform: translateY(-2px);
+}
+
+.list-group-item {
+    background: rgba(255,255,255,0.04) !important;
+    border: 1px solid rgba(255,255,255,0.08) !important;
+    color: #e5e7eb !important;
+    border-radius: 12px;
+}
+a {
+    color: #38bdf8;
+}
+a:hover {
+    color: #7dd3fc;
+}
+#tasks select.form-select {
+    appearance: auto !important;
+    background-repeat: no-repeat !important;
+    background-position: right 12px center !important;
+    background-size: 10px !important;
+    padding-right: 30px !important;
+}
+</style>
 <h2>{{ project.Name }}</h2>
+
 <div class="mb-3">
   {% if user_role == 'MANAGER' %}
   <a href="{% url 'task_add' %}?project_id={{ project.ID }}" class="btn btn-primary">
@@ -15,14 +193,13 @@
 </div>
 <ul class="nav nav-tabs">
     <li class="nav-item">
-        <a class="nav-link active text-dark" data-bs-toggle="tab" href="#overview">
-            Overview
-        </a>
+        <a class="nav-link active text-dark" data-bs-toggle="tab" href="#overview">Overview</a>
     </li>
     <li class="nav-item">
-        <a class="nav-link text-dark" data-bs-toggle="tab" href="#tasks">
-            Tasks
-        </a>
+        <a class="nav-link text-dark" data-bs-toggle="tab" href="#tasks">Tasks</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link text-dark" data-bs-toggle="tab" href="#files">Files</a>
     </li>
     {% if user_role == 'MANAGER' %}
     <li class="nav-item">
@@ -33,7 +210,7 @@
     {% endif %}
     {% if user_role == 'EMPLOYEE' %}
     <li class="nav-item">
-        <a class="nav-link text-dark" href="{% url 'task_list' %}">
+        <a class="nav-link text-dark" href="{% url 'task_list' %}?project_id={{ project.ID }}">
             My Tasks
         </a>
     </li>
@@ -52,40 +229,45 @@
             <table class="table table-bordered">
                 <thead class="table-dark">
                     <tr>
-                        <th>Name</th>
-                        <th>Assigned To</th>
-                        <th>Status</th>
-                        {% if user_role == 'MANAGER' %}
-                        <th>Assign Employee</th>
-                        {% endif %}
-                        <th>Action</th>
+                  <th>Name</th>
+                <th>Assigned To</th>
+              <th>Status</th>
+              {% if user_role == 'MANAGER' %}
+                  <th>Assign Employee</th>
+                {% endif %}
+            <th>Action</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {% for task in tasks %}
-                    <tr>
-                        <td>{{ task.Name }}</td>
-                        <td class="assigned-cell">
-                            {% if task.Assigned_To and task.Assigned_To.Role == 'EMPLOYEE' %}
-                                <span class="badge bg-secondary">
-                                    {{ task.Assigned_To.username }}
-                                </span>
-                            {% else %}
-                                <span class="text-muted">Not assigned</span>
-                            {% endif %}
-                        </td>
-                        <td>
-                            {% if task.Status == "Done" %}
-                                <span class="badge bg-success">Done</span>
-                            {% elif task.Status == "In Progress" %}
-                                <span class="badge bg-info text-dark">In Progress</span>
-                            {% else %}
-                                <span class="badge bg-warning text-dark">Pending</span>
-                            {% endif %}
-                        </td>
-                        {% if user_role == 'MANAGER' %}
-                        <td>
-                            <form class="assign-form" method="POST" action="{% url 'task_edit' task.ID %}">
+                {% for task in tasks %}
+                <tr>
+                    <td>{{ task.Name }}</td>
+                    <td class="assigned-cell">
+                        {% if task.Assigned_To and task.Assigned_To.Role == 'EMPLOYEE' %}
+                            <span class="badge bg-secondary">
+                                {{ task.Assigned_To.username }}
+                            </span>
+                        {% else %}
+                            <span class="text-muted">Not assigned</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if task.Status == "Done" %}
+                            <span class="badge bg-success">Done</span>
+                        {% elif task.Status == "In Progress" %}
+                            <span class="badge bg-info text-dark">In Progress</span>
+                        {% else %}
+                            <span class="badge bg-warning text-dark">Pending</span>
+                        {% endif %}
+                    </td>
+                    {% if user_role == 'MANAGER' %}
+                    <td>
+                        {% if task.Status == "Done" %}
+                            <span class="badge bg-success">
+                                {{ task.Assigned_To.username }}
+                            </span>
+                        {% else %}
+                    <form class="assign-form" method="POST" action="{% url 'task_edit' task.ID %}">
                                 {% csrf_token %}
                                 <select name="assigned_to"
                                         class="form-select form-select-sm assign-select">
@@ -96,13 +278,14 @@
                                             {{ emp.username }}
                                         </option>
                                     {% endfor %}
-
                                 </select>
                             </form>
-                        </td>
                         {% endif %}
-                        <td>
-                            {% if user_role == 'MANAGER' and task.Assigned_To %}
+
+                    </td>
+                    {% endif %}
+                    <td>
+                        {% if user_role == 'MANAGER' and task.Assigned_To and task.Status != "Done" %}
                             <form class="delete-form" method="POST" action="{% url 'task_edit' task.ID %}">
                                 {% csrf_token %}
                                 <input type="hidden" name="remove_member" value="1">
@@ -110,17 +293,17 @@
                                     Remove
                                 </button>
                             </form>
-                            {% else %}
-                                <span class="text-muted">-</span>
-                            {% endif %}
-                        </td>
-                    </tr>
-                    {% endfor %}
+                        {% else %}
+                            <span class="text-muted">-</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
                 </tbody>
             </table>
         </div>
         <div class="d-block d-md-none">
-            {% for task in tasks %}
+        {% for task in tasks %}
             <div class="card mb-2 p-3 shadow-sm">
                 <div class="d-flex justify-content-between">
                     <strong>{{ task.Name }}</strong>
@@ -144,53 +327,90 @@
                 </div>
                 {% if user_role == 'MANAGER' %}
                 <div class="mt-2">
-                    <form class="assign-form" method="POST" action="{% url 'task_edit' task.ID %}">
-                        {% csrf_token %}
-                        <select name="assigned_to" class="form-select form-select-sm assign-select">
-                            <option value="">Select Employee</option>
-                            {% for emp in employees %}
-                                <option value="{{ emp.id }}"
-                                {% if task.Assigned_To and task.Assigned_To.id == emp.id %}selected{% endif %}>
-                                    {{ emp.username }}
-                                </option>
-                            {% endfor %}
-                        </select>
-                    </form>
-                </div>
-                {% endif %}
-                <div class="mt-2">
-                    {% if user_role == 'MANAGER' and task.Assigned_To %}
-                    <form class="delete-form" method="POST" action="{% url 'task_edit' task.ID %}">
-                        {% csrf_token %}
-                        <input type="hidden" name="remove_member" value="1">
-                        <button type="submit" class="btn btn-sm btn-danger w-100">Remove</button>
-                    </form>
+                    {% if task.Status == "Done" %}
+                        <span class="badge bg-success">
+                            {{ task.Assigned_To.username }}
+                        </span>
                     {% else %}
-                        <span class="text-muted">-</span>
+                        <form class="assign-form" method="POST" action="{% url 'task_edit' task.ID %}">
+                            {% csrf_token %}
+                            <select name="assigned_to" class="form-select form-select-sm assign-select">
+                                <option value="">Select Employee</option>
+                                {% for emp in employees %}
+                                    <option value="{{ emp.id }}"
+                                    {% if task.Assigned_To and task.Assigned_To.id == emp.id %}selected{% endif %}>
+                                        {{ emp.username }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </form>
                     {% endif %}
                 </div>
+                {% endif %}
             </div>
-            {% endfor %}
-        </div>
-    </div>
+        {% endfor %}
+        </div>   </div>
+<div class="tab-pane fade" id="files">
+    <div class="card p-3">
+        <h5>Project Files</h5>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>File Name</th>
+                    <th>Uploaded At</th>
+                    <th>Download</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for f in project.files.all %}
+                <tr>
+                    <td>{{ f.ID }}</td>
+                    <td>{{ f.File.name }}</td>
+<td>{{ f.Uploaded_At|date:"d F Y" }}</td>
+                    <td>
+                        <a href="{{ f.File.url }}" download class="btn btn-sm btn-primary">  ⬇ Download</a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                 <td colspan="4" class="text-muted">No files uploaded</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div></div>
     {% if user_role == 'MANAGER' %}
     <div class="tab-pane fade" id="members">
         <div class="card p-3">
             <h5>Total Members: {{ members.count }}</h5>
             <ul class="list-group mt-3">
                 {% for member in members %}
-         <li class="list-group-item d-flex justify-content-between align-items-center">
-              {{ member.username }}
-              <span class="badge bg-primary">{{ member.Role }}</span>
-                    </li>
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <div>
+                        {{ member.username }}
+                    </div>
+                    <div class="d-flex gap-2 align-items-center">
+                        <span class="badge bg-primary">{{ member.Role }}</span>
+                        <form method="POST" action="{% url 'add_member_to_project' project.ID %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="remove_member_id" value="{{ member.id }}">
+                            <button type="submit" class="btn btn-sm btn-danger">
+                                Remove
+                            </button>
+                        </form>
+                    </div>
+
+                </li>
                 {% endfor %}
             </ul>
+
         </div>
     </div>
     {% endif %}
 </div>
 <div class="mt-4">
-    <a href="javascript:history.back()" class="btn btn-secondary"> ⬅ Back</a>
+    <a href="javascript:history.back()" class="btn btn-secondary">⬅ Back</a>
 </div>
 <div id="toast" style="
     position:fixed;
@@ -207,7 +427,8 @@ function showToast(message, type="success"){
     toast.innerText = message;
     toast.style.display = "block";
     toast.style.background = (type === "success") ? "#28a745" : "#dc3545";
-    setTimeout(()=>{ toast.style.display = "none"; }, 2500);}
+    setTimeout(()=>{ toast.style.display = "none"; }, 2500);
+}
 </script>
 <script>
 document.querySelectorAll(".assign-form").forEach(form => {
@@ -217,21 +438,21 @@ document.querySelectorAll(".assign-form").forEach(form => {
         let row = form.closest("tr");
         let data = new FormData(form);
         fetch(form.action, {
-     method: "POST",
-     headers: {
-    "X-Requested-With": "XMLHttpRequest",
-     "X-CSRFToken": form.querySelector("[name=csrfmiddlewaretoken]").value },
-         body: data
-        })
+            method: "POST",
+            headers: {
+                "X-Requested-With": "XMLHttpRequest",
+                "X-CSRFToken": form.querySelector("[name=csrfmiddlewaretoken]").value
+            },
+            body: data})
         .then(res => res.json())
         .then(data => {
-            showToast(data.message, data.status)
+            showToast(data.message, data.status);
             if(data.status === "success"){
-        let text = select.options[select.selectedIndex].text;
-        let cell = row?.querySelector(".assigned-cell");
-         if(cell){
-       cell.innerHTML = `<span class="badge bg-secondary">${text}</span>`; }}
-})
+                let text = select.options[select.selectedIndex].text;
+                let cell = row?.querySelector(".assigned-cell");
+                if(cell){
+                    cell.innerHTML = `<span class="badge bg-secondary">${text}</span>`;}   }
+        })
         .catch(() => showToast("Server error", "error"));
     });
 });
@@ -239,22 +460,25 @@ document.querySelectorAll(".assign-form").forEach(form => {
 <script>
 document.addEventListener("submit", function(e){
     if(!e.target.classList.contains("delete-form")) return;
-    e.preventDefault(); 
+    e.preventDefault();
     let form = e.target;
     let row = form.closest("tr");
     let data = new FormData(form);
     fetch(form.action, {
- method: "POST",
-headers: {
-         "X-Requested-With": "XMLHttpRequest",
-        "X-CSRFToken": form.querySelector("[name=csrfmiddlewaretoken]").value},
-        body: data})
+        method: "POST",
+        headers: {
+            "X-Requested-With": "XMLHttpRequest",
+            "X-CSRFToken": form.querySelector("[name=csrfmiddlewaretoken]").value
+        },
+        body: data
+    })
     .then(res => res.json())
     .then(data => {
-showToast(data.message, data.status);
- if(data.status === "deleted"){
-  if(row) row.remove();
-        } })
-    .catch(() => showToast("Error occurred", "error"));});
+        showToast(data.message, data.status);
+        if(data.status === "deleted"){
+            if(row) row.remove();  }
+    })
+    .catch(() => showToast("Error occurred", "error"));
+});
 </script>
 {% endblock %}

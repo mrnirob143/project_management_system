@@ -1,96 +1,293 @@
 {% extends 'base.html' %}
 {% block content %}
 
+<style>
+/* ================= BASE THEME (DASHBOARD MATCH) ================= */
+.user-page {
+    background: transparent;
+}
+
+.user-page h2 {
+    color: #f1f5f9;
+    font-weight: 700;
+    margin-bottom: 18px;
+    letter-spacing: 0.4px;
+}
+
+/* ================= ADD BUTTON ================= */
+.user-page .btn-primary {
+    background: linear-gradient(135deg, #1e3a8a, #0f172a);
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    color: #e2e8f0;
+    padding: 10px 18px;
+    border-radius: 12px;
+    font-weight: 600;
+    margin-bottom: 22px;
+    transition: 0.3s ease;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.35);
+}
+
+.user-page .btn-primary:hover {
+    transform: translateY(-2px);
+    border-color: rgba(56, 189, 248, 0.35);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.45);
+}
+
+/* ================= TABLE WRAPPER ================= */
+.user-page .table-wrapper {
+    background: rgba(15, 23, 42, 0.65);
+    border: 1px solid rgba(148, 163, 184, 0.12);
+    border-radius: 18px;
+    padding: 16px;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 25px 60px rgba(0,0,0,0.4);
+}
+
+/* ================= TABLE ================= */
+.user-page table {
+    width: 100%;
+    border-collapse: collapse;
+    color: #e2e8f0;
+}
+
+.user-page thead tr {
+    background: rgba(255,255,255,0.02);
+}
+
+.user-page th {
+    text-align: left;
+    padding: 14px;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: #94a3b8;
+}
+
+.user-page td {
+    padding: 14px;
+    border-top: 1px solid rgba(148, 163, 184, 0.10);
+    font-size: 14px;
+}
+
+/* ROW HOVER */
+.user-page tbody tr {
+    transition: 0.25s ease;
+}
+
+.user-page tbody tr:hover {
+    background: rgba(56, 189, 248, 0.05);
+}
+
+/* ================= AVATAR ================= */
+.user-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid rgba(148, 163, 184, 0.25);
+    background: #0f172a;
+}
+
+.user-avatar-fallback {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    color: #e2e8f0;
+    background: linear-gradient(135deg, #0f172a, #1e293b);
+    border: 2px solid rgba(148, 163, 184, 0.25);
+}
+
+/* ================= TEXT ================= */
+.user-name {
+    font-weight: 600;
+    color: #f8fafc;
+}
+
+.user-email {
+    font-size: 12px;
+    color: #94a3b8;
+}
+
+/* ================= ROLE ================= */
+.role-badge {
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.admin { background: rgba(248,113,113,0.12); color: #fca5a5; }
+.manager { background: rgba(96,165,250,0.12); color: #93c5fd; }
+.employee { background: rgba(74,222,128,0.12); color: #86efac; }
+
+/* ================= ACTION BUTTONS ================= */
+.btn-info, .btn-warning, .btn-danger {
+    border: 1px solid rgba(148, 163, 184, 0.15);
+    border-radius: 10px;
+    padding: 6px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-left: 4px;
+    transition: 0.25s ease;
+}
+
+.btn-info {
+    background: rgba(56, 189, 248, 0.08);
+    color: #7dd3fc;
+}
+.btn-info:hover {
+    background: rgba(56, 189, 248, 0.15);
+    color: #f7e3e3;
+}
+
+.btn-warning {
+    background: rgba(251, 191, 36, 0.08);
+    color: #fde68a;
+}
+.btn-warning:hover {
+    background: rgba(251, 191, 36, 0.15);
+    color: #f7e3e3;
+}
+
+.btn-danger {
+    background: rgba(248, 113, 113, 0.08);
+    color: #f7e3e3;
+}
+.btn-danger:hover {
+    background: rgba(248, 113, 113, 0.15);
+}
+
+/* ================= DATATABLE DARK ================= */
+.dataTables_wrapper {
+    color: #e2e8f0;
+    margin-top: 10px;
+}
+
+.dataTables_filter input,
+.dataTables_length select {
+    background: #0f172a;
+    color: #ffffff;
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    border-radius: 10px;
+    padding: 6px;
+}
+
+/* ✅ FIX: SHOW ENTRIES DROPDOWN TEXT */
+.dataTables_length label {
+    color: #e2e8f0 !important;
+}
+
+.dataTables_length select option {
+    background: #0f172a;
+    color: #ffffff;
+}
+
+.dataTables_paginate {
+    margin-top: 10px;
+}
+
+</style>
+
+<div class="user-page">
+
 <h2>Users</h2>
 
-<a href="{% url 'create_user' %}" class="btn btn-primary mb-3">
-    Add User
-</a>
+<a href="{% url 'create_user' %}" class="btn btn-primary">Add User</a>
 
-<!-- ================= DESKTOP ================= -->
-<div class="d-none d-md-block table-responsive">
+<div class="table-wrapper">
 
-    <table class="table table-bordered table-hover table-striped">
+<table id="userTable">
 
-        <thead class="table-dark">
-            <tr>
-                <th>ID</th>
-                <th>Username</th>
-                <th>Email</th>
-                <th>Role</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
+    <thead>
+        <tr>
+            <th>Avatar</th>
+            <th>User</th>
+            <th>Role</th>
+            <th style="text-align:right;">Actions</th>
+        </tr>
+    </thead>
 
-        <tbody>
-            {% for user in users %}
-            <tr>
+    <tbody>
+        {% for user in users %}
+        <tr>
 
-                <td>{{ user.id }}</td>
-                <td>{{ user.username }}</td>
-                <td>{{ user.email }}</td>
-                <td>{{ user.Role }}</td>
+            <td>
+                {% if user.profile_image %}
+                    <img src="{{ user.profile_image.url }}" class="user-avatar">
+                {% else %}
+                    <div class="user-avatar-fallback">
+                        {{ user.username|slice:":1"|upper }}
+                    </div>
+                {% endif %}
+            </td>
 
-                <td>
-
-                    {% if request.user.Role == 'ADMIN' %}
-                    <a href="{% url 'user_detail' user.id %}" class="btn btn-sm btn-info">
-                        Details
-                    </a>
+            <td>
+                <div class="user-name">
+                    {% if user.first_name and user.last_name %}
+                        {{ user.first_name }} {{ user.last_name }}
+                    {% elif user.first_name %}
+                        {{ user.first_name }}
+                    {% else %}
+                        {{ user.username }}
                     {% endif %}
+                </div>
+                <div class="user-email">{{ user.email }}</div>
+            </td>
 
-                    {% if user != request.user %}
-                    <form method="POST" action="{% url 'delete_user' user.id %}" style="display:inline;">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-sm btn-danger"
-                                onclick="return confirm('Are you sure?')">
-                            Delete
-                        </button>
-                    </form>
-                    {% endif %}
+            <td>
+                {% if user.Role == 'ADMIN' %}
+                    <span class="role-badge admin">Admin</span>
+                {% elif user.Role == 'MANAGER' %}
+                    <span class="role-badge manager">Manager</span>
+                {% else %}
+                    <span class="role-badge employee">Employee</span>
+                {% endif %}
+            </td>
 
-                </td>
+            <td style="text-align:right;">
 
-            </tr>
-            {% endfor %}
-        </tbody>
+                {% if request.user.Role == 'ADMIN' %}
+                    <a href="{% url 'user_detail' user.id %}" class="btn btn-info">Details</a>
+                    <a href="{% url 'edit_user' user.id %}" class="btn btn-warning">Edit</a>
+                {% endif %}
 
-    </table>
-</div>
+                {% if user != request.user %}
+                <form method="POST" action="{% url 'delete_user' user.id %}" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </form>
+                {% endif %}
 
-<!-- ================= MOBILE ================= -->
-<div class="d-md-none">
+            </td>
 
-    {% for user in users %}
-    <div class="card mb-3 shadow-sm">
+        </tr>
+        {% endfor %}
+    </tbody>
 
-        <div class="card-body">
-
-            <h5 class="card-title">{{ user.username }} (ID: {{ user.id }})</h5>
-            <p><strong>Email:</strong> {{ user.email }}</p>
-            <p><strong>Role:</strong> {{ user.Role }}</p>
-
-            {% if request.user.Role == 'ADMIN' %}
-                <a href="{% url 'user_detail' user.id %}" class="btn btn-sm btn-info">
-                    Details
-                </a>
-            {% endif %}
-
-            {% if user != request.user %}
-            <form method="POST" action="{% url 'delete_user' user.id %}" style="display:inline;">
-                {% csrf_token %}
-                <button type="submit" class="btn btn-sm btn-danger"
-                        onclick="return confirm('Are you sure?')">
-                    Delete
-                </button>
-            </form>
-            {% endif %}
-
-        </div>
-
-    </div>
-    {% endfor %}
+</table>
 
 </div>
+</div>
+
+<!-- ================= DATATABLE CDN ================= -->
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/jquery.dataTables.min.css">
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+
+<script>
+$(document).ready(function () {
+    $('#userTable').DataTable({
+        pageLength: 10,
+        ordering: true,
+        searching: true,
+        lengthChange: true
+    });
+});
+</script>
 
 {% endblock %}

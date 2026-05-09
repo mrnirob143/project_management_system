@@ -1,6 +1,154 @@
 {% extends 'base.html' %}
 
 {% block content %}
+<style>
+    /* =========================================================
+   ⭐ ADD MEMBERS PAGE UI (FINAL - NAVBAR SAFE)
+========================================================= */
+
+/* ================= PAGE BASE ================= */
+body {
+    background: linear-gradient(135deg, #0b1220, #0f172a);
+    font-family: 'Inter', sans-serif;
+}
+
+/* ================= PAGE TEXT ================= */
+.container {
+    color: #e5e7eb;
+}
+
+/* ================= MAIN CARD ================= */
+.card {
+    background: rgba(15, 23, 42, 0.55) !important;
+    border: 1px solid rgba(56, 189, 248, 0.10) !important;
+    border-radius: 20px !important;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 18px 45px rgba(0,0,0,0.45);
+}
+
+/* ================= HEADER ================= */
+.card .bg-dark {
+    background: linear-gradient(135deg, #0ea5e9, #1e293b) !important;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    text-align: center;
+}
+
+.card .bg-dark h4 {
+    color: #ffffff;
+    font-weight: 600;
+}
+
+.card .bg-dark small {
+    color: #e2e8f0 !important;
+    opacity: 0.8;
+}
+
+/* ================= FORM LABEL ================= */
+.form-label {
+    color: #e5e7eb !important;
+    font-weight: 600;
+}
+
+/* ================= CHECKBOX BOX ================= */
+.border.rounded-4 {
+    background: rgba(2, 6, 23, 0.65) !important;
+    border: 1px solid rgba(56, 189, 248, 0.15) !important;
+    border-radius: 16px !important;
+
+    padding: 18px !important;
+    max-height: 320px;
+    overflow-y: auto;
+}
+
+/* ================= CHECKBOX ROW ================= */
+.form-check {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    padding: 10px 10px;
+    margin-bottom: 6px;
+
+    border-radius: 10px;
+    transition: 0.2s ease;
+}
+
+.form-check:hover {
+    background: rgba(56, 189, 248, 0.08);
+    padding-left: 14px;
+}
+
+/* ================= CHECKBOX INPUT ================= */
+.form-check-input {
+    margin: 0 !important;
+    flex-shrink: 0;
+
+    transform: scale(1.05);
+    cursor: pointer;
+
+    border: 1px solid #38bdf8;
+    background-color: transparent;
+}
+
+/* ================= LABEL TEXT ================= */
+.form-check-label {
+    margin: 0 !important;
+    padding: 0 !important;
+
+    color: #e5e7eb !important;
+    line-height: 1.4;
+}
+
+/* employee tag */
+.text-muted {
+    color: #94a3b8 !important;
+}
+
+/* ================= BUTTON PRIMARY ================= */
+.btn-primary {
+    background: linear-gradient(135deg, #38bdf8, #1e293b) !important;
+    border: none !important;
+    border-radius: 14px !important;
+    color: #fff !important;
+    font-weight: 600;
+    transition: 0.25s ease;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 30px rgba(56, 189, 248, 0.25);
+}
+
+/* ================= BACK BUTTON ================= */
+.btn-outline-secondary {
+    border: 1px solid rgba(148, 163, 184, 0.4) !important;
+    color: #e5e7eb !important;
+    border-radius: 14px !important;
+    background: transparent !important;
+}
+
+.btn-outline-secondary:hover {
+    background: rgba(148, 163, 184, 0.1) !important;
+}
+
+/* ================= ALERT ================= */
+.alert {
+    background: rgba(34, 197, 94, 0.12) !important;
+    border: 1px solid rgba(34, 197, 94, 0.25) !important;
+    color: #86efac !important;
+    border-radius: 14px !important;
+}
+
+/* ================= SCROLLBAR ================= */
+.border.rounded-4::-webkit-scrollbar {
+    width: 6px;
+}
+
+.border.rounded-4::-webkit-scrollbar-thumb {
+    background: rgba(56, 189, 248, 0.4);
+    border-radius: 10px;
+}
+</style>
 
 <div class="container py-5">
 

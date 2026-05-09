@@ -1,72 +1,244 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="container mt-4">
-    <div class="row justify-content-center">
-        <div class="col-md-5">
-            <div class="card shadow">
-                <div class="card-header bg-primary text-white text-center">
-                    <h4>{% if form.instance.pk %}Edit User{% else %}Add User{% endif %}</h4>
-                </div>
-                <div class="card-body">
-                    <form method="POST" id="userForm">
-                        {% csrf_token %}
-                        {{ form.as_p }}
-                        <button type="submit" class="btn btn-primary w-100 mt-2">
-                            Submit
-                        </button>
-                    </form>
-                    <a href="javascript:history.back()" class="btn btn-secondary w-100 mt-2">
-                        Back
-                    </a>
-                    <div id="successMsg" class="alert alert-success mt-3 d-none"></div>
-                    <div id="errorMsg" class="alert alert-danger mt-3 d-none"></div>
+<style>
+body {
+    background: radial-gradient(circle at top, #0b1220, #060b16);
+    font-family: 'Inter', sans-serif;
+    color: #e5e7eb;
+}
+.auth-wrapper {
+    min-height: 90vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 30px;
+}
+.card {
+    background: rgba(255,255,255,0.06);
+    border-radius: 18px;
+    border: 1px solid rgba(255,255,255,0.12);
+    width: 100%;
+    max-width: 850px;   /* ⭐ BIG FORM */
+    box-shadow: 0 25px 60px rgba(0,0,0,0.6);
+    backdrop-filter: blur(10px);
+}
+.card-header {
+    background: linear-gradient(135deg, #38bdf8, #1e293b);
+    padding: 18px;
+    text-align: center;
+    border-radius: 18px 18px 0 0;
+}
 
-                </div>
-            </div>
+.card-header h4 {
+    color: white;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+.card-body {
+    padding: 35px;
+}
+input, select {
+    width: 100%;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.15);
+    background: rgba(15,23,42,0.85);
+    color: white;
+    transition: 0.2s ease;
+}
+input:focus, select:focus {
+    border-color: #38bdf8;
+    box-shadow: 0 0 0 3px rgba(56,189,248,0.2);
+    outline: none;
+}
+label {
+    display: block;
+    margin-top: 10px;
+    margin-bottom: 5px;
+    color: #cbd5e1;
+    font-size: 14px;
+}
+.error-text {
+    color: #fca5a5;
+    font-size: 13px;
+    margin-bottom: 10px;
+    display: block;
+}
+.btn-primary {
+    background: linear-gradient(135deg, #38bdf8, #1e293b);
+    border: none;
+    color: white;
+    border-radius: 12px;
+    padding: 12px;
+    font-weight: 500;
+    transition: 0.2s;
+}
+.btn-primary:hover {
+    transform: translateY(-1px);
+}
+.back-btn {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.15);
+    color: #e5e7eb;
+    border-radius: 12px;
+    padding: 12px;
+    text-align: center;
+    display: block;
+    text-decoration: none;
+    margin-top: 10px;
+}
+.pwd-wrap {
+    position: relative;
+}
+.pwd-wrap span {
+    position: absolute;
+    right: 12px;
+    top: 10px;
+    cursor: pointer;
+    color: #fff;
+}
+</style>
+{% load crispy_forms_tags %}
+
+<div class="auth-wrapper">
+<div class="card">
+
+    <div class="card-header">
+        <h4>{{ title|default:"User Form" }}</h4>
+    </div>
+
+    <div class="card-body">
+
+<form method="POST" id="userForm">
+    {% csrf_token %}
+
+    <div style="display:flex; gap:18px;">
+        <div style="flex:1;">
+            {% if form.first_name %}
+                {{ form.first_name|as_crispy_field }}
+            {% endif %}
+            <span class="error-text" id="first_name_error"></span>
+        </div>
+
+        <div style="flex:1;">
+            {% if form.last_name %}
+                {{ form.last_name|as_crispy_field }}
+            {% endif %}
+            <span class="error-text" id="last_name_error"></span>
         </div>
     </div>
+
+    {% if form.email %}
+        {{ form.email|as_crispy_field }}
+        <span class="error-text" id="email_error"></span>
+    {% endif %}
+
+    {% if form.Role %}
+        {{ form.Role|as_crispy_field }}
+        <span class="error-text" id="Role_error"></span>
+    {% endif %}
+
+    {% if form.Phone %}
+        {{ form.Phone|as_crispy_field }}
+        <span class="error-text" id="Phone_error"></span>
+    {% endif %}
+
+    {% if form.JoinDate %}
+        {{ form.JoinDate|as_crispy_field }}
+        <span class="error-text" id="JoinDate_error"></span>
+    {% endif %}
+
+    {% if form.Dept %}
+        {{ form.Dept|as_crispy_field }}
+        <span class="error-text" id="Dept_error"></span>
+    {% endif %}
+
+    {# 🔥 CREATE FORM ONLY #}
+    {% if form.password1 %}
+        <div class="pwd-wrap">
+            {{ form.password1|as_crispy_field }}
+            <span onclick="togglePassword('id_password1')">👁</span>
+        </div>
+        <span class="error-text" id="password1_error"></span>
+    {% endif %}
+
+    {% if form.password2 %}
+        <div class="pwd-wrap">
+            {{ form.password2|as_crispy_field }}
+            <span onclick="togglePassword('id_password2')">👁</span>
+        </div>
+        <span class="error-text" id="password2_error"></span>
+    {% endif %}
+
+    <button type="submit" class="btn btn-primary w-100 mt-3">
+        Submit
+    </button>
+
+    <a href="javascript:history.back()" class="back-btn">
+        Back
+    </a>
+
+</form>
+
+    </div>
+</div>
 </div>
 <script>
-document.getElementById("userForm").addEventListener("submit", function(e){
-    e.preventDefault();
-    let form = this;
-    let formData = new FormData(form);
-    let successBox = document.getElementById("successMsg");
-    let errorBox = document.getElementById("errorMsg");
-    fetch("", {
-        method: "POST",
-        headers: {
-            "X-Requested-With": "XMLHttpRequest"},
-        body: formData})
-    .then(res => res.json())
-    .then(data => {
-        if(data.success){
-     successBox.classList.remove("d-none");
-        errorBox.classList.add("d-none");
-    successBox.innerText = data.message;
-    form.reset();
-    setTimeout(() => {
-    window.location.href = "/users/";
-            }, 800);}
-        else{
- successBox.classList.add("d-none");
-     errorBox.classList.remove("d-none");
- errorBox.innerHTML = "";
-    if(data.errors){
-      for(let field in data.errors){
-         errorBox.innerHTML += data.errors[field] + "<br>"; }
-       } else {
-    errorBox.innerText = "Validation failed!";
-       }
-        }
-    })
-    .catch(err => {
-     console.log(err);
- errorBox.classList.remove("d-none");
- errorBox.innerText = "Something went wrong!";
+document.addEventListener("DOMContentLoaded", function () {
+    const joinDate = document.querySelector("input[name='JoinDate']");
+    if (joinDate) {
+        joinDate.type = "date";    }
+const form = document.getElementById("userForm");
+    function showToast(message) {
+        let toast = document.createElement("div");
+        toast.innerText = message;
+        toast.style.position = "fixed";
+        toast.style.top = "20px";
+        toast.style.right = "20px";
+        toast.style.background = "#22c55e";
+        toast.style.color = "#fff";
+        toast.style.padding = "10px 15px";
+        toast.style.borderRadius = "8px";
+        toast.style.zIndex = "9999";
+        toast.style.fontSize = "14px";
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 800);}
+    form.addEventListener("submit", function (e) {
+        e.preventDefault();
+        let formData = new FormData(this);
+        document.querySelectorAll(".error-text").forEach(el => {
+            el.innerText = "";
+        });
+        fetch("", {
+            method: "POST",
+            headers: {
+                "X-Requested-With": "XMLHttpRequest"
+            },
+            body: formData})
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                showToast(data.message);
+                this.reset();
+                setTimeout(() => {
+                    window.location.href = "/users/";
+                }, 600);}
+            else if (data.errors) {
+                for (let field in data.errors) {
+                    let el = document.getElementById(field + "_error");
+                    if (el) el.innerText = data.errors[field];
+                } }
+        })
+        .catch(() => {
+            alert("Something went wrong!");
+        });
     });
-
 });
+function togglePassword(id) {
+    let input = document.getElementById(id);
+    if (!input) return;
+    input.type = input.type === "password" ? "text" : "password";}
 </script>
 {% endblock %}

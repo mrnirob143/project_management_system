@@ -37,4 +37,6 @@ urlpatterns = [
 
     #RESET PASSWORD
     path('user/reset-password/<int:id>/', views.reset_user_password, name='reset_user_password'),
+
+    path( 'project/<int:id>/download/pdf/',views.project_download_pdf,name='project_download_pdf'),
 ]
